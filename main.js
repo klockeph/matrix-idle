@@ -10600,9 +10600,9 @@ var $elm$core$Basics$never = function (_v0) {
 	}
 };
 var $elm$browser$Browser$element = _Browser_element;
-var $author$project$Main$Model = F7(
-	function (coins, tickspeed, active_bar, bars, algorithms, active_algorithm, algorithm_state) {
-		return {active_algorithm: active_algorithm, active_bar: active_bar, algorithm_state: algorithm_state, algorithms: algorithms, bars: bars, coins: coins, tickspeed: tickspeed};
+var $author$project$Main$Model = F8(
+	function (coins, tickspeed, tickspeed_price, active_bar, bars, algorithms, active_algorithm, algorithm_state) {
+		return {active_algorithm: active_algorithm, active_bar: active_bar, algorithm_state: algorithm_state, algorithms: algorithms, bars: bars, coins: coins, tickspeed: tickspeed, tickspeed_price: tickspeed_price};
 	});
 var $author$project$Main$NoState = {$: 'NoState'};
 var $author$project$Main$GenerateBars = function (a) {
@@ -10847,9 +10847,9 @@ var $pzp1997$assoc_list$AssocList$fromList = function (alist) {
 var $author$project$Bars$BubbleSort = {$: 'BubbleSort'};
 var $author$project$Bars$kBubbleSort = {active: false, algo: $author$project$Bars$BubbleSort, name: 'BubbleSort', price: 10, unlocked: false};
 var $author$project$Bars$InsertionSort = {$: 'InsertionSort'};
-var $author$project$Bars$kInsertionSort = {active: false, algo: $author$project$Bars$InsertionSort, name: 'InsertionSort', price: 10, unlocked: false};
+var $author$project$Bars$kInsertionSort = {active: false, algo: $author$project$Bars$InsertionSort, name: 'InsertionSort', price: 50, unlocked: false};
 var $author$project$Bars$QuickSort = {$: 'QuickSort'};
-var $author$project$Bars$kQuickSort = {active: false, algo: $author$project$Bars$QuickSort, name: 'QuickSort', price: 30, unlocked: false};
+var $author$project$Bars$kQuickSort = {active: false, algo: $author$project$Bars$QuickSort, name: 'QuickSort\nNOT IMPLEMENTED', price: 30, unlocked: false};
 var $author$project$Bars$kAlgorithms = _List_fromArray(
 	[$author$project$Bars$kBubbleSort, $author$project$Bars$kInsertionSort, $author$project$Bars$kQuickSort]);
 var $author$project$Bars$kAlgorithmDict = $pzp1997$assoc_list$AssocList$fromList(
@@ -10861,7 +10861,7 @@ var $author$project$Bars$kAlgorithmDict = $pzp1997$assoc_list$AssocList$fromList
 		$author$project$Bars$kAlgorithms));
 var $author$project$Main$init = function (_v0) {
 	return _Utils_Tuple2(
-		A7($author$project$Main$Model, 0, 1000, $elm$core$Maybe$Nothing, $elm$core$Array$empty, $author$project$Bars$kAlgorithmDict, $elm$core$Maybe$Nothing, $author$project$Main$NoState),
+		A8($author$project$Main$Model, 0, 1000, 100, $elm$core$Maybe$Nothing, $elm$core$Array$empty, $author$project$Bars$kAlgorithmDict, $elm$core$Maybe$Nothing, $author$project$Main$NoState),
 		$author$project$Main$generateRandomBars(4));
 };
 var $elm$time$Time$Every = F2(
@@ -11031,11 +11031,61 @@ var $elm$time$Time$every = F2(
 			A2($elm$time$Time$Every, interval, tagger));
 	});
 var $author$project$Main$NoMsg = {$: 'NoMsg'};
+var $author$project$Main$BubbleSortState = function (a) {
+	return {$: 'BubbleSortState', a: a};
+};
+var $author$project$Main$Multiple = F2(
+	function (a, b) {
+		return {$: 'Multiple', a: a, b: b};
+	});
+var $author$project$Main$SwapBars = F2(
+	function (a, b) {
+		return {$: 'SwapBars', a: a, b: b};
+	});
+var $author$project$Main$UpdateAlgorithmState = function (a) {
+	return {$: 'UpdateAlgorithmState', a: a};
+};
+var $author$project$Main$bubbleSortState = {last_bar: 0};
 var $author$project$Main$bubbleSortInternal = F2(
 	function (lb, bs) {
-		return $author$project$Main$NoMsg;
+		bubbleSortInternal:
+		while (true) {
+			var nextIdx = lb.last_bar + 1;
+			var next = A2($elm$core$Array$get, nextIdx, bs);
+			var current = A2($elm$core$Array$get, lb.last_bar, bs);
+			var _v0 = _Utils_Tuple2(current, next);
+			if ((_v0.a.$ === 'Just') && (_v0.b.$ === 'Just')) {
+				var a = _v0.a.a;
+				var b = _v0.b.a;
+				if (_Utils_cmp(a, b) > 0) {
+					return A2(
+						$author$project$Main$Multiple,
+						_List_fromArray(
+							[
+								$author$project$Main$UpdateAlgorithmState(
+								$author$project$Main$BubbleSortState(
+									{last_bar: nextIdx})),
+								A2($author$project$Main$SwapBars, lb.last_bar, nextIdx)
+							]),
+						_List_Nil);
+				} else {
+					var $temp$lb = _Utils_update(
+						lb,
+						{last_bar: nextIdx}),
+						$temp$bs = bs;
+					lb = $temp$lb;
+					bs = $temp$bs;
+					continue bubbleSortInternal;
+				}
+			} else {
+				var $temp$lb = $author$project$Main$bubbleSortState,
+					$temp$bs = bs;
+				lb = $temp$lb;
+				bs = $temp$bs;
+				continue bubbleSortInternal;
+			}
+		}
 	});
-var $author$project$Main$bubbleSortState = {last_bar: 0};
 var $author$project$Main$bubbleSortFn = F2(
 	function (b, l) {
 		if (b.$ === 'BubbleSortState') {
@@ -11044,10 +11094,6 @@ var $author$project$Main$bubbleSortFn = F2(
 		} else {
 			return A2($author$project$Main$bubbleSortInternal, $author$project$Main$bubbleSortState, l);
 		}
-	});
-var $author$project$Main$SwapBars = F2(
-	function (a, b) {
-		return {$: 'SwapBars', a: a, b: b};
 	});
 var $author$project$Main$insertionSortFn = function (l) {
 	var insertionSortFnI = F2(
@@ -11099,7 +11145,7 @@ var $author$project$Main$stepAlgorithm = F2(
 var $author$project$Main$subscriptions = function (model) {
 	return A2(
 		$elm$time$Time$every,
-		model.tickspeed + 1000,
+		model.tickspeed,
 		$author$project$Main$stepAlgorithm(model));
 };
 var $pzp1997$assoc_list$AssocList$get = F2(
@@ -11338,73 +11384,100 @@ var $author$project$Bars$swapBars = F3(
 var $author$project$Main$tickspeedPrice = 10;
 var $author$project$Main$update = F2(
 	function (msg, model) {
-		switch (msg.$) {
-			case 'BuyTickspeed':
-				return _Utils_Tuple2(
-					_Utils_update(
+		update:
+		while (true) {
+			switch (msg.$) {
+				case 'Multiple':
+					var msgs = msg.a;
+					var cmds = msg.b;
+					var _v1 = _Utils_Tuple2(msgs, cmds);
+					if (!_v1.a.b) {
+						var cs = _v1.b;
+						return _Utils_Tuple2(
+							model,
+							$elm$core$Platform$Cmd$batch(cs));
+					} else {
+						var _v2 = _v1.a;
+						var m = _v2.a;
+						var ms = _v2.b;
+						var cs = _v1.b;
+						var _v3 = A2($author$project$Main$update, m, model);
+						var newModel = _v3.a;
+						var cmd = _v3.b;
+						var $temp$msg = A2(
+							$author$project$Main$Multiple,
+							ms,
+							A2($elm$core$List$cons, cmd, cs)),
+							$temp$model = newModel;
+						msg = $temp$msg;
+						model = $temp$model;
+						continue update;
+					}
+				case 'BuyTickspeed':
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{coins: model.coins - $author$project$Main$tickspeedPrice, tickspeed: model.tickspeed * 0.95, tickspeed_price: model.tickspeed_price * 5}),
+						$elm$core$Platform$Cmd$none);
+				case 'ClickBar':
+					var x = msg.a;
+					return A2($author$project$Main$clickBar, model, x);
+				case 'AddCoins':
+					var i = msg.a;
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{coins: model.coins + i}),
+						$elm$core$Platform$Cmd$none);
+				case 'GenerateBars':
+					var newBars = msg.a;
+					return $author$project$Bars$barsSortedL(newBars) ? _Utils_Tuple2(
 						model,
-						{coins: model.coins - $author$project$Main$tickspeedPrice, tickspeed: model.tickspeed * 0.95}),
-					$elm$core$Platform$Cmd$none);
-			case 'ClickBar':
-				var x = msg.a;
-				return A2($author$project$Main$clickBar, model, x);
-			case 'AddCoins':
-				var i = msg.a;
-				return _Utils_Tuple2(
-					_Utils_update(
+						$author$project$Main$generateRandomBars(
+							$elm$core$List$length(newBars))) : _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								algorithm_state: $author$project$Main$NoState,
+								bars: $elm$core$Array$fromList(newBars)
+							}),
+						$elm$core$Platform$Cmd$none);
+				case 'ChangeBarCount':
+					var bar_count = msg.a;
+					return _Utils_Tuple2(
 						model,
-						{coins: model.coins + i}),
-					$elm$core$Platform$Cmd$none);
-			case 'GenerateBars':
-				var newBars = msg.a;
-				return $author$project$Bars$barsSortedL(newBars) ? _Utils_Tuple2(
-					model,
-					$author$project$Main$generateRandomBars(
-						$elm$core$List$length(newBars))) : _Utils_Tuple2(
-					_Utils_update(
+						$author$project$Main$generateRandomBars(bar_count));
+				case 'BuyAlgorithm':
+					var a = msg.a;
+					return _Utils_Tuple2(
+						A2($author$project$Main$buyAlgorithm, model, a),
+						$elm$core$Platform$Cmd$none);
+				case 'ActivateAlgorithm':
+					var a = msg.a;
+					return _Utils_Tuple2(
+						A2($author$project$Main$activateAlgorithm, model, a),
+						$elm$core$Platform$Cmd$none);
+				case 'NoMsg':
+					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+				case 'SwapBars':
+					var b1 = msg.a;
+					var b2 = msg.b;
+					var new_model = _Utils_update(
 						model,
 						{
-							bars: $elm$core$Array$fromList(newBars)
-						}),
-					$elm$core$Platform$Cmd$none);
-			case 'ChangeBarCount':
-				var bar_count = msg.a;
-				return _Utils_Tuple2(
-					model,
-					$author$project$Main$generateRandomBars(bar_count));
-			case 'BuyAlgorithm':
-				var a = msg.a;
-				return _Utils_Tuple2(
-					A2($author$project$Main$buyAlgorithm, model, a),
-					$elm$core$Platform$Cmd$none);
-			case 'ActivateAlgorithm':
-				var a = msg.a;
-				return _Utils_Tuple2(
-					A2($author$project$Main$activateAlgorithm, model, a),
-					$elm$core$Platform$Cmd$none);
-			case 'NoMsg':
-				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-			case 'SwapBars':
-				var b1 = msg.a;
-				var b2 = msg.b;
-				var new_model = _Utils_update(
-					model,
-					{
-						bars: A3($author$project$Bars$swapBars, model.bars, b1, b2)
-					});
-				return _Utils_Tuple2(
-					new_model,
-					$author$project$Main$checkSortedAndCmd(new_model));
-			default:
-				var newBars = msg.a;
-				var new_model = _Utils_update(
-					model,
-					{
-						bars: $elm$core$Array$fromList(newBars)
-					});
-				return _Utils_Tuple2(
-					new_model,
-					$author$project$Main$checkSortedAndCmd(new_model));
+							bars: A3($author$project$Bars$swapBars, model.bars, b1, b2)
+						});
+					return _Utils_Tuple2(
+						new_model,
+						$author$project$Main$checkSortedAndCmd(new_model));
+				default:
+					var s = msg.a;
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{algorithm_state: s}),
+						$elm$core$Platform$Cmd$none);
+			}
 		}
 	});
 var $author$project$Main$ActivateAlgorithm = function (a) {
@@ -13360,6 +13433,17 @@ var $author$project$Main$algoButtons = F2(
 					},
 					algos)));
 	});
+var $rtfeldman$elm_css$Html$Styled$br = $rtfeldman$elm_css$Html$Styled$node('br');
+var $author$project$Main$BuyTickspeed = {$: 'BuyTickspeed'};
+var $author$project$Main$buyTickspeedButton = F2(
+	function (coins, price) {
+		return $author$project$Buttons$mySimpleButton(
+			{
+				enabled: _Utils_cmp(coins, price) > -1,
+				label: 'Decrease Tickspeed by 5%\nCost: ' + $elm$core$String$fromInt(price),
+				onPress: $author$project$Main$BuyTickspeed
+			});
+	});
 var $author$project$Main$ClickBar = function (a) {
 	return {$: 'ClickBar', a: a};
 };
@@ -14189,7 +14273,7 @@ var $author$project$Main$view = function (model) {
 					_List_Nil,
 					_List_fromArray(
 						[
-							$rtfeldman$elm_css$Html$Styled$text('CS Idle')
+							$rtfeldman$elm_css$Html$Styled$text('Matrix Idle')
 						])),
 					A2(
 					$rtfeldman$elm_css$Html$Styled$h2,
@@ -14199,6 +14283,7 @@ var $author$project$Main$view = function (model) {
 							$rtfeldman$elm_css$Html$Styled$text(
 							'You have ' + ($elm$core$String$fromInt(model.coins) + '฿'))
 						])),
+					A2($author$project$Main$buyTickspeedButton, model.coins, model.tickspeed_price),
 					A2(
 					$rtfeldman$elm_css$Html$Styled$div,
 					_List_fromArray(
@@ -14245,10 +14330,21 @@ var $author$project$Main$view = function (model) {
 					A2(
 					$author$project$Main$algoButtons,
 					$pzp1997$assoc_list$AssocList$values(model.algorithms),
-					model.coins)
+					model.coins),
+					A2($rtfeldman$elm_css$Html$Styled$br, _List_Nil, _List_Nil),
+					A2(
+					$rtfeldman$elm_css$Html$Styled$div,
+					_List_Nil,
+					_List_fromArray(
+						[
+							$rtfeldman$elm_css$Html$Styled$text('Tickspeed: '),
+							$rtfeldman$elm_css$Html$Styled$text(
+							$elm$core$String$fromFloat(model.tickspeed)),
+							$rtfeldman$elm_css$Html$Styled$text('ms')
+						]))
 				])));
 };
 var $author$project$Main$main = $elm$browser$Browser$element(
 	{init: $author$project$Main$init, subscriptions: $author$project$Main$subscriptions, update: $author$project$Main$update, view: $author$project$Main$view});
 _Platform_export({'Main':{'init':$author$project$Main$main(
-	$elm$json$Json$Decode$succeed(_Utils_Tuple0))({"versions":{"elm":"0.19.1"},"types":{"message":"Main.Msg","aliases":{},"unions":{"Main.Msg":{"args":[],"tags":{"BuyTickspeed":[],"ClickBar":["Basics.Int"],"AddCoins":["Basics.Int"],"GenerateBars":["List.List Basics.Int"],"ChangeBarCount":["Basics.Int"],"BuyAlgorithm":["Bars.AlgorithmType"],"ActivateAlgorithm":["Bars.AlgorithmType"],"NoMsg":[],"SwapBars":["Basics.Int","Basics.Int"],"AlgorithmStep":["List.List Basics.Int"]}},"Bars.AlgorithmType":{"args":[],"tags":{"BubbleSort":[],"InsertionSort":[],"QuickSort":[]}},"Basics.Int":{"args":[],"tags":{"Int":[]}},"List.List":{"args":["a"],"tags":{}}}}})}});}(this));
+	$elm$json$Json$Decode$succeed(_Utils_Tuple0))({"versions":{"elm":"0.19.1"},"types":{"message":"Main.Msg","aliases":{},"unions":{"Main.Msg":{"args":[],"tags":{"BuyTickspeed":[],"ClickBar":["Basics.Int"],"AddCoins":["Basics.Int"],"GenerateBars":["List.List Basics.Int"],"ChangeBarCount":["Basics.Int"],"BuyAlgorithm":["Bars.AlgorithmType"],"ActivateAlgorithm":["Bars.AlgorithmType"],"NoMsg":[],"SwapBars":["Basics.Int","Basics.Int"],"UpdateAlgorithmState":["Main.AlgorithmState"],"Multiple":["List.List Main.Msg","List.List (Platform.Cmd.Cmd Main.Msg)"]}},"Main.AlgorithmState":{"args":[],"tags":{"NoState":[],"BubbleSortState":["{ last_bar : Basics.Int }"]}},"Bars.AlgorithmType":{"args":[],"tags":{"BubbleSort":[],"InsertionSort":[],"QuickSort":[]}},"Platform.Cmd.Cmd":{"args":["msg"],"tags":{"Cmd":[]}},"Basics.Int":{"args":[],"tags":{"Int":[]}},"List.List":{"args":["a"],"tags":{}}}}})}});}(this));

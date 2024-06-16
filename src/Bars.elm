@@ -41,11 +41,11 @@ kBubbleSort =
 
 
 kInsertionSort =
-    { algo = InsertionSort, name = "InsertionSort", unlocked = False, active = False, price = 10 }
+    { algo = InsertionSort, name = "InsertionSort", unlocked = False, active = False, price = 50 }
 
 
 kQuickSort =
-    { algo = QuickSort, name = "QuickSort", unlocked = False, active = False, price = 30 }
+    { algo = QuickSort, name = "QuickSort\nNOT IMPLEMENTED", unlocked = False, active = False, price = 30 }
 
 
 kBARS =

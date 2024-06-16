@@ -33,6 +33,7 @@ main =
 type alias Model =
     { coins : Int
     , tickspeed : Float
+    , tickspeed_price : Int
     , active_bar : Maybe Int
     , bars : Array Int
     , algorithms : Dict AlgorithmType Algorithm
@@ -43,7 +44,7 @@ type alias Model =
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( Model 0 1000 Nothing Array.empty kAlgorithmDict Nothing NoState, generateRandomBars 4 )
+    ( Model 0 1000 100 Nothing Array.empty kAlgorithmDict Nothing NoState, generateRandomBars 4 )
 
 
 
@@ -60,14 +61,28 @@ type Msg
     | ActivateAlgorithm AlgorithmType
     | NoMsg
     | SwapBars Int Int
-    | AlgorithmStep (List Int)
+    | UpdateAlgorithmState AlgorithmState
+    -- Please don't use the second arugument! No idea what happens ...
+    | Multiple (List Msg) (List (Cmd Msg))
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
+        Multiple msgs cmds ->
+            case ( msgs, cmds ) of
+                ( [], cs ) ->
+                    ( model, Cmd.batch cs )
+
+                ( m :: ms, cs ) ->
+                    let
+                        ( newModel, cmd ) =
+                            update m model
+                    in
+                    update (Multiple ms (cmd :: cs)) newModel
+
         BuyTickspeed ->
-            ( { model | coins = model.coins - tickspeedPrice, tickspeed = model.tickspeed * 0.95 }, Cmd.none )
+            ( { model | coins = model.coins - tickspeedPrice, tickspeed = model.tickspeed * 0.95, tickspeed_price = model.tickspeed_price * 5 }, Cmd.none )
 
         ClickBar x ->
             clickBar model x
@@ -80,7 +95,7 @@ update msg model =
                 ( model, generateRandomBars (List.length newBars) )
 
             else
-                ( { model | bars = Array.fromList newBars }, Cmd.none )
+                ( { model | bars = Array.fromList newBars, algorithm_state = NoState }, Cmd.none )
 
         ChangeBarCount bar_count ->
             -- reuse the randomBars logic but use 0 as first argument for GenerateBars because no points shall be given.
@@ -102,12 +117,8 @@ update msg model =
             in
             ( new_model, checkSortedAndCmd new_model )
 
-        AlgorithmStep newBars ->
-            let
-                new_model =
-                    { model | bars = Array.fromList newBars }
-            in
-            ( new_model, checkSortedAndCmd new_model )
+        UpdateAlgorithmState s ->
+          ({model | algorithm_state = s}, Cmd.none)
 
 
 buyAlgorithm : Model -> AlgorithmType -> Model
@@ -123,10 +134,6 @@ buyAlgorithm model algoT =
                     Dict.insert algoT { algo | unlocked = True } model.algorithms
             in
             { model | coins = model.coins - algo.price, algorithms = algos }
-
-
-
--- TODO:: initialize AlgorithmState here!
 
 
 activateAlgorithm : Model -> AlgorithmType -> Model
@@ -238,7 +245,24 @@ bubbleSortState =
 
 bubbleSortInternal : { last_bar : Int } -> Array Int -> Msg
 bubbleSortInternal lb bs =
-    NoMsg
+    let
+        nextIdx = lb.last_bar + 1
+
+        current : Maybe Int
+        current =
+            Array.get lb.last_bar bs
+
+        next : Maybe Int
+        next =
+            Array.get nextIdx bs
+    in
+    case ( current, next ) of
+        ( Just a, Just b ) ->
+            if a > b then Multiple [UpdateAlgorithmState (BubbleSortState {last_bar = nextIdx }), SwapBars lb.last_bar nextIdx] []
+            else {- in this case we have to continue with next bar -}
+              bubbleSortInternal {lb | last_bar = nextIdx} bs
+        _ ->
+              bubbleSortInternal bubbleSortState bs
 
 
 bubbleSortFn : AlgorithmState -> Array Int -> Msg
@@ -269,7 +293,7 @@ stepAlgorithm m _ =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Time.every (model.tickspeed + 1000) (stepAlgorithm model)
+    Time.every (model.tickspeed) (stepAlgorithm model)
 
 
 
@@ -350,6 +374,9 @@ algoBuyButton : Int -> Algorithm -> Html.Html Msg
 algoBuyButton coins algo =
     mySimpleButton { onPress = BuyAlgorithm algo.algo, label = algo.name ++ "\nCost: " ++ String.fromInt algo.price, enabled = coins > algo.price }
 
+buyTickspeedButton : Int -> Int -> Html.Html Msg
+buyTickspeedButton coins price =
+    mySimpleButton { onPress = BuyTickspeed, label = "Decrease Tickspeed by 5%\nCost: " ++ String.fromInt price, enabled = coins >= price }
 
 algoActivateButton : Algorithm -> Html.Html Msg
 algoActivateButton algo =
@@ -382,8 +409,9 @@ algoButtons algos coins =
 view model =
     Html.toUnstyled
         (Html.div []
-            [ Html.h1 [] [ Html.text "CS Idle" ]
+            [ Html.h1 [] [ Html.text "Matrix Idle" ]
             , Html.h2 [] [ Html.text ("You have " ++ String.fromInt model.coins ++ "฿") ]
+            , buyTickspeedButton model.coins model.tickspeed_price
             , Html.div [ Attr.css [ Css.float Css.left ] ]
                 [ Svg.svg
                     [ SvgAttr.width (String.fromInt kWIDTH)
@@ -405,5 +433,7 @@ view model =
                 , problemSizeButtons (Array.length model.bars)
                 ]
             , algoButtons (Dict.values model.algorithms) model.coins
+            , Html.br [] []
+            , Html.div [] [Html.text "Tickspeed: ", Html.text (String.fromFloat model.tickspeed), Html.text "ms"]
             ]
         )
