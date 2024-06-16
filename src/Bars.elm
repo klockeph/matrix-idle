@@ -40,7 +40,7 @@ kBubbleSort =
 
 
 kInsertionSort =
-    { algo = InsertionSort, name = "InsertionSort", unlocked = False, active = False, price = 10 }
+    { algo = InsertionSort, name = "InsertionSort", unlocked = False, active = False, price = 11 }
 
 
 kQuickSort =

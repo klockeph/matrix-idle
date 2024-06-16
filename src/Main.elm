@@ -200,53 +200,6 @@ clickBar model clicked =
                 ( { model | active_bar = Nothing }, Task.perform (\_ -> SwapBars mi ma) (Task.succeed ()) )
 
 
-splitSortedPart : List Int -> ( List Int, List Int )
-splitSortedPart ls =
-    let
-        splitSortedPartI l s =
-            case l of
-                b1 :: b2 :: bs ->
-                    if b1 <= b2 then
-                        splitSortedPartI (b2 :: bs) (b1 :: s)
-
-                    else
-                        ( List.reverse (b1 :: s), b2 :: bs )
-
-                [ b ] ->
-                    ( List.reverse (b :: s), [] )
-
-                _ ->
-                    ( List.reverse s, l )
-    in
-    case ls of
-        x :: xs ->
-            splitSortedPartI xs [ x ]
-
-        _ ->
-            ( [], ls )
-
-
-
-{-
-   insertionSortFn : List Int -> Msg
-   insertionSortFn l =
-       let
-           ( sorted, unsorted ) =
-               splitSortedPart l
-       in
-       case unsorted of
-           x :: xs ->
-               let
-                   newBars =
-                       List.sort (x :: sorted) ++ xs
-               in
-               AlgorithmStep newBars
-
-           _ ->
-               NoMsg
--}
-
-
 insertionSortFn : List Int -> Msg
 insertionSortFn l =
     let
@@ -296,7 +249,7 @@ kWIDTH =
     800
 
 
-drawBarsX : {max_height: Int, width: Int, padding: Int, active_bar: Maybe Int, algorithm_active: Bool } -> Int -> List Int -> List (Svg.Svg Msg)
+drawBarsX : { max_height : Int, width : Int, padding : Int, active_bar : Maybe Int, algorithm_active : Bool } -> Int -> List Int -> List (Svg.Svg Msg)
 drawBarsX statics idx bars =
     case bars of
         [] ->
@@ -345,7 +298,7 @@ drawBars model =
             else
                 model.active_bar
     in
-    drawBarsX {max_height = kHEIGHT, width = 40, padding = 5, active_bar=active_bar, algorithm_active=algorithm_active} 0 model.bars
+    drawBarsX { max_height = kHEIGHT, width = 40, padding = 5, active_bar = active_bar, algorithm_active = algorithm_active } 0 model.bars
 
 
 problemSizeButtons bar_count =
