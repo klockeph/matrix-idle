@@ -99,7 +99,7 @@ myButton : ButtonSpec msg -> Html.Html msg
 myButton spec =
     Html.button
         (myOnPress spec.onPress spec.state ++ [ Attr.css (myButtonStyle spec.state) ])
-        [ Html.pre [] [ Html.text spec.label ] ]
+        [ Html.pre [Attr.style "font-family" "'OCR A Std', sans-serif"] [ Html.text spec.label ] ]
 
 
 type alias SimpleButtonSpec msg =

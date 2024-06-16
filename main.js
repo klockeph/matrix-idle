@@ -13226,6 +13226,15 @@ var $author$project$Buttons$myOnPress = F2(
 		}
 	});
 var $rtfeldman$elm_css$Html$Styled$pre = $rtfeldman$elm_css$Html$Styled$node('pre');
+var $rtfeldman$elm_css$VirtualDom$Styled$style = F2(
+	function (key, val) {
+		return A3(
+			$rtfeldman$elm_css$VirtualDom$Styled$Attribute,
+			A2($elm$virtual_dom$VirtualDom$style, key, val),
+			false,
+			'');
+	});
+var $rtfeldman$elm_css$Html$Styled$Attributes$style = $rtfeldman$elm_css$VirtualDom$Styled$style;
 var $rtfeldman$elm_css$VirtualDom$Styled$Unstyled = function (a) {
 	return {$: 'Unstyled', a: a};
 };
@@ -13248,7 +13257,10 @@ var $author$project$Buttons$myButton = function (spec) {
 			[
 				A2(
 				$rtfeldman$elm_css$Html$Styled$pre,
-				_List_Nil,
+				_List_fromArray(
+					[
+						A2($rtfeldman$elm_css$Html$Styled$Attributes$style, 'font-family', '\'OCR A Std\', sans-serif')
+					]),
 				_List_fromArray(
 					[
 						$rtfeldman$elm_css$Html$Styled$text(spec.label)
@@ -13348,8 +13360,8 @@ var $rtfeldman$elm_css$Svg$Styled$rect = $rtfeldman$elm_css$Svg$Styled$node('rec
 var $rtfeldman$elm_css$Svg$Styled$Attributes$width = $rtfeldman$elm_css$VirtualDom$Styled$attribute('width');
 var $rtfeldman$elm_css$Svg$Styled$Attributes$x = $rtfeldman$elm_css$VirtualDom$Styled$attribute('x');
 var $rtfeldman$elm_css$Svg$Styled$Attributes$y = $rtfeldman$elm_css$VirtualDom$Styled$attribute('y');
-var $author$project$Main$drawBarsX = F7(
-	function (max_height, w, padding, active_bar, algorithm_active, idx, bars) {
+var $author$project$Main$drawBarsX = F3(
+	function (statics, idx, bars) {
 		if (!bars.b) {
 			return _List_Nil;
 		} else {
@@ -13363,34 +13375,38 @@ var $author$project$Main$drawBarsX = F7(
 						_List_fromArray(
 							[
 								$rtfeldman$elm_css$Svg$Styled$Attributes$x(
-								A3($author$project$Bars$getBarPos, w, padding, idx)),
+								A3($author$project$Bars$getBarPos, statics.width, statics.padding, idx)),
 								$rtfeldman$elm_css$Svg$Styled$Attributes$y(
 								$elm$core$String$fromInt(
-									max_height - A2($author$project$Bars$getBarHeight, max_height, b))),
+									statics.max_height - A2($author$project$Bars$getBarHeight, statics.max_height, b))),
 								$rtfeldman$elm_css$Svg$Styled$Attributes$width(
-								$elm$core$String$fromInt(w)),
+								$elm$core$String$fromInt(statics.width)),
 								$rtfeldman$elm_css$Svg$Styled$Attributes$height(
 								$elm$core$String$fromInt(
-									A2($author$project$Bars$getBarHeight, max_height, b))),
+									A2($author$project$Bars$getBarHeight, statics.max_height, b))),
 								$rtfeldman$elm_css$Svg$Styled$Attributes$css(
-								(!algorithm_active) ? (_Utils_eq(
-									active_bar,
+								(!statics.algorithm_active) ? (_Utils_eq(
+									statics.active_bar,
 									$elm$core$Maybe$Just(idx)) ? $author$project$Buttons$activeButtonStyle : $author$project$Buttons$inactiveButtonStyle) : $author$project$Buttons$disabledButtonStyle)
 							]),
-						algorithm_active ? _List_Nil : _List_fromArray(
+						statics.algorithm_active ? _List_Nil : _List_fromArray(
 							[
 								$rtfeldman$elm_css$Svg$Styled$Events$onClick(
 								$author$project$Main$ClickBar(idx))
 							])),
 					_List_Nil),
-				A7($author$project$Main$drawBarsX, max_height, w, padding, active_bar, algorithm_active, idx + 1, bs));
+				A3($author$project$Main$drawBarsX, statics, idx + 1, bs));
 		}
 	});
 var $author$project$Main$kHEIGHT = 600;
 var $author$project$Main$drawBars = function (model) {
 	var algorithm_active = !_Utils_eq(model.active_algorithm, $elm$core$Maybe$Nothing);
 	var active_bar = algorithm_active ? $elm$core$Maybe$Nothing : model.active_bar;
-	return A7($author$project$Main$drawBarsX, $author$project$Main$kHEIGHT, 40, 5, active_bar, algorithm_active, 0, model.bars);
+	return A3(
+		$author$project$Main$drawBarsX,
+		{active_bar: active_bar, algorithm_active: algorithm_active, max_height: $author$project$Main$kHEIGHT, padding: 5, width: 40},
+		0,
+		model.bars);
 };
 var $rtfeldman$elm_css$Svg$Styled$Attributes$fill = $rtfeldman$elm_css$VirtualDom$Styled$attribute('fill');
 var $rtfeldman$elm_css$Css$Internal$property = F2(
@@ -13514,13 +13530,13 @@ var $author$project$Main$problemSizeButtons = function (bar_count) {
 					label: '<',
 					onPress: $author$project$Main$ChangeBarCount(bar_count - 1)
 				}),
+				$rtfeldman$elm_css$Html$Styled$text('Problem Size'),
 				$author$project$Buttons$mySimpleButton(
 				{
 					enabled: _Utils_cmp(bar_count, $author$project$Bars$kMAX_BARS) < 0,
 					label: '>',
 					onPress: $author$project$Main$ChangeBarCount(bar_count + 1)
-				}),
-				$rtfeldman$elm_css$Html$Styled$text('Problem Size')
+				})
 			]));
 };
 var $rtfeldman$elm_css$Svg$Styled$Attributes$stroke = $rtfeldman$elm_css$VirtualDom$Styled$attribute('stroke');
@@ -14118,7 +14134,7 @@ var $author$project$Main$view = function (model) {
 					_List_fromArray(
 						[
 							$rtfeldman$elm_css$Html$Styled$text(
-							'You have ' + ($elm$core$String$fromInt(model.coins) + '$'))
+							'You have ' + ($elm$core$String$fromInt(model.coins) + '฿'))
 						])),
 					A2(
 					$rtfeldman$elm_css$Html$Styled$div,

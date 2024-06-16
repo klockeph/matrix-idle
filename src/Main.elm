@@ -296,23 +296,23 @@ kWIDTH =
     800
 
 
-drawBarsX : Int -> Int -> Int -> Maybe Int -> Bool -> Int -> List Int -> List (Svg.Svg Msg)
-drawBarsX max_height w padding active_bar algorithm_active idx bars =
+drawBarsX : {max_height: Int, width: Int, padding: Int, active_bar: Maybe Int, algorithm_active: Bool } -> Int -> List Int -> List (Svg.Svg Msg)
+drawBarsX statics idx bars =
     case bars of
         [] ->
             []
 
         b :: bs ->
             Svg.rect
-                ([ SvgAttr.x (getBarPos w padding idx)
-                 , SvgAttr.y (String.fromInt (max_height - getBarHeight max_height b))
-                 , SvgAttr.width (String.fromInt w)
-                 , SvgAttr.height (String.fromInt (getBarHeight max_height b))
+                ([ SvgAttr.x (getBarPos statics.width statics.padding idx)
+                 , SvgAttr.y (String.fromInt (statics.max_height - getBarHeight statics.max_height b))
+                 , SvgAttr.width (String.fromInt statics.width)
+                 , SvgAttr.height (String.fromInt (getBarHeight statics.max_height b))
 
                  {- TODO: unfortunately the CSS does not work ... but in general Tailwind variables are available, which is great! -}
                  , SvgAttr.css
-                    (if not algorithm_active then
-                        if active_bar == Just idx then
+                    (if not statics.algorithm_active then
+                        if statics.active_bar == Just idx then
                             activeButtonStyle
 
                         else
@@ -322,7 +322,7 @@ drawBarsX max_height w padding active_bar algorithm_active idx bars =
                         disabledButtonStyle
                     )
                  ]
-                    ++ (if algorithm_active then
+                    ++ (if statics.algorithm_active then
                             []
 
                         else
@@ -330,7 +330,7 @@ drawBarsX max_height w padding active_bar algorithm_active idx bars =
                        )
                 )
                 []
-                :: drawBarsX max_height w padding active_bar algorithm_active (idx + 1) bs
+                :: drawBarsX statics (idx + 1) bs
 
 
 drawBars model =
@@ -345,14 +345,14 @@ drawBars model =
             else
                 model.active_bar
     in
-    drawBarsX kHEIGHT 40 5 active_bar algorithm_active 0 model.bars
+    drawBarsX {max_height = kHEIGHT, width = 40, padding = 5, active_bar=active_bar, algorithm_active=algorithm_active} 0 model.bars
 
 
 problemSizeButtons bar_count =
     Html.div []
         [ mySimpleButton { onPress = ChangeBarCount (bar_count - 1), label = "<", enabled = bar_count > kMIN_BARS }
-        , mySimpleButton { onPress = ChangeBarCount (bar_count + 1), label = ">", enabled = bar_count < kMAX_BARS }
         , Html.text "Problem Size"
+        , mySimpleButton { onPress = ChangeBarCount (bar_count + 1), label = ">", enabled = bar_count < kMAX_BARS }
         ]
 
 
@@ -393,7 +393,7 @@ view model =
     Html.toUnstyled
         (Html.div []
             [ Html.h1 [] [ Html.text "CS Idle" ]
-            , Html.h2 [] [ Html.text ("You have " ++ String.fromInt model.coins ++ "$") ]
+            , Html.h2 [] [ Html.text ("You have " ++ String.fromInt model.coins ++ "฿") ]
             , Html.div [ Attr.css [ Css.float Css.left ] ]
                 [ Svg.svg
                     [ SvgAttr.width (String.fromInt kWIDTH)
