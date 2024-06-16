@@ -10605,433 +10605,6 @@ var $author$project$Main$Model = F7(
 		return {active_algorithm: active_algorithm, active_bar: active_bar, algorithm_state: algorithm_state, algorithms: algorithms, bars: bars, coins: coins, tickspeed: tickspeed};
 	});
 var $author$project$Main$NoState = {$: 'NoState'};
-var $pzp1997$assoc_list$AssocList$D = function (a) {
-	return {$: 'D', a: a};
-};
-var $elm$core$List$filter = F2(
-	function (isGood, list) {
-		return A3(
-			$elm$core$List$foldr,
-			F2(
-				function (x, xs) {
-					return isGood(x) ? A2($elm$core$List$cons, x, xs) : xs;
-				}),
-			_List_Nil,
-			list);
-	});
-var $pzp1997$assoc_list$AssocList$remove = F2(
-	function (targetKey, _v0) {
-		var alist = _v0.a;
-		return $pzp1997$assoc_list$AssocList$D(
-			A2(
-				$elm$core$List$filter,
-				function (_v1) {
-					var key = _v1.a;
-					return !_Utils_eq(key, targetKey);
-				},
-				alist));
-	});
-var $pzp1997$assoc_list$AssocList$insert = F3(
-	function (key, value, dict) {
-		var _v0 = A2($pzp1997$assoc_list$AssocList$remove, key, dict);
-		var alteredAlist = _v0.a;
-		return $pzp1997$assoc_list$AssocList$D(
-			A2(
-				$elm$core$List$cons,
-				_Utils_Tuple2(key, value),
-				alteredAlist));
-	});
-var $pzp1997$assoc_list$AssocList$fromList = function (alist) {
-	return A3(
-		$elm$core$List$foldl,
-		F2(
-			function (_v0, result) {
-				var key = _v0.a;
-				var value = _v0.b;
-				return A3($pzp1997$assoc_list$AssocList$insert, key, value, result);
-			}),
-		$pzp1997$assoc_list$AssocList$D(_List_Nil),
-		alist);
-};
-var $author$project$Bars$BubbleSort = {$: 'BubbleSort'};
-var $author$project$Bars$kBubbleSort = {active: false, algo: $author$project$Bars$BubbleSort, name: 'BubbleSort', price: 10, unlocked: false};
-var $author$project$Bars$InsertionSort = {$: 'InsertionSort'};
-var $author$project$Bars$kInsertionSort = {active: false, algo: $author$project$Bars$InsertionSort, name: 'InsertionSort', price: 11, unlocked: false};
-var $author$project$Bars$QuickSort = {$: 'QuickSort'};
-var $author$project$Bars$kQuickSort = {active: false, algo: $author$project$Bars$QuickSort, name: 'QuickSort', price: 30, unlocked: false};
-var $author$project$Bars$kAlgorithms = _List_fromArray(
-	[$author$project$Bars$kBubbleSort, $author$project$Bars$kInsertionSort, $author$project$Bars$kQuickSort]);
-var $author$project$Bars$kAlgorithmDict = $pzp1997$assoc_list$AssocList$fromList(
-	A2(
-		$elm$core$List$map,
-		function (x) {
-			return _Utils_Tuple2(x.algo, x);
-		},
-		$author$project$Bars$kAlgorithms));
-var $author$project$Bars$kBARS = _List_fromArray(
-	[10, 20, 50, 40]);
-var $author$project$Main$init = function (_v0) {
-	return _Utils_Tuple2(
-		A7($author$project$Main$Model, 0, 1000, $elm$core$Maybe$Nothing, $author$project$Bars$kBARS, $author$project$Bars$kAlgorithmDict, $elm$core$Maybe$Nothing, $author$project$Main$NoState),
-		$elm$core$Platform$Cmd$none);
-};
-var $elm$time$Time$Every = F2(
-	function (a, b) {
-		return {$: 'Every', a: a, b: b};
-	});
-var $elm$time$Time$State = F2(
-	function (taggers, processes) {
-		return {processes: processes, taggers: taggers};
-	});
-var $elm$time$Time$init = $elm$core$Task$succeed(
-	A2($elm$time$Time$State, $elm$core$Dict$empty, $elm$core$Dict$empty));
-var $elm$time$Time$addMySub = F2(
-	function (_v0, state) {
-		var interval = _v0.a;
-		var tagger = _v0.b;
-		var _v1 = A2($elm$core$Dict$get, interval, state);
-		if (_v1.$ === 'Nothing') {
-			return A3(
-				$elm$core$Dict$insert,
-				interval,
-				_List_fromArray(
-					[tagger]),
-				state);
-		} else {
-			var taggers = _v1.a;
-			return A3(
-				$elm$core$Dict$insert,
-				interval,
-				A2($elm$core$List$cons, tagger, taggers),
-				state);
-		}
-	});
-var $elm$core$Process$kill = _Scheduler_kill;
-var $elm$core$Platform$sendToSelf = _Platform_sendToSelf;
-var $elm$time$Time$Name = function (a) {
-	return {$: 'Name', a: a};
-};
-var $elm$time$Time$Offset = function (a) {
-	return {$: 'Offset', a: a};
-};
-var $elm$time$Time$Zone = F2(
-	function (a, b) {
-		return {$: 'Zone', a: a, b: b};
-	});
-var $elm$time$Time$customZone = $elm$time$Time$Zone;
-var $elm$time$Time$setInterval = _Time_setInterval;
-var $elm$core$Process$spawn = _Scheduler_spawn;
-var $elm$time$Time$spawnHelp = F3(
-	function (router, intervals, processes) {
-		if (!intervals.b) {
-			return $elm$core$Task$succeed(processes);
-		} else {
-			var interval = intervals.a;
-			var rest = intervals.b;
-			var spawnTimer = $elm$core$Process$spawn(
-				A2(
-					$elm$time$Time$setInterval,
-					interval,
-					A2($elm$core$Platform$sendToSelf, router, interval)));
-			var spawnRest = function (id) {
-				return A3(
-					$elm$time$Time$spawnHelp,
-					router,
-					rest,
-					A3($elm$core$Dict$insert, interval, id, processes));
-			};
-			return A2($elm$core$Task$andThen, spawnRest, spawnTimer);
-		}
-	});
-var $elm$time$Time$onEffects = F3(
-	function (router, subs, _v0) {
-		var processes = _v0.processes;
-		var rightStep = F3(
-			function (_v6, id, _v7) {
-				var spawns = _v7.a;
-				var existing = _v7.b;
-				var kills = _v7.c;
-				return _Utils_Tuple3(
-					spawns,
-					existing,
-					A2(
-						$elm$core$Task$andThen,
-						function (_v5) {
-							return kills;
-						},
-						$elm$core$Process$kill(id)));
-			});
-		var newTaggers = A3($elm$core$List$foldl, $elm$time$Time$addMySub, $elm$core$Dict$empty, subs);
-		var leftStep = F3(
-			function (interval, taggers, _v4) {
-				var spawns = _v4.a;
-				var existing = _v4.b;
-				var kills = _v4.c;
-				return _Utils_Tuple3(
-					A2($elm$core$List$cons, interval, spawns),
-					existing,
-					kills);
-			});
-		var bothStep = F4(
-			function (interval, taggers, id, _v3) {
-				var spawns = _v3.a;
-				var existing = _v3.b;
-				var kills = _v3.c;
-				return _Utils_Tuple3(
-					spawns,
-					A3($elm$core$Dict$insert, interval, id, existing),
-					kills);
-			});
-		var _v1 = A6(
-			$elm$core$Dict$merge,
-			leftStep,
-			bothStep,
-			rightStep,
-			newTaggers,
-			processes,
-			_Utils_Tuple3(
-				_List_Nil,
-				$elm$core$Dict$empty,
-				$elm$core$Task$succeed(_Utils_Tuple0)));
-		var spawnList = _v1.a;
-		var existingDict = _v1.b;
-		var killTask = _v1.c;
-		return A2(
-			$elm$core$Task$andThen,
-			function (newProcesses) {
-				return $elm$core$Task$succeed(
-					A2($elm$time$Time$State, newTaggers, newProcesses));
-			},
-			A2(
-				$elm$core$Task$andThen,
-				function (_v2) {
-					return A3($elm$time$Time$spawnHelp, router, spawnList, existingDict);
-				},
-				killTask));
-	});
-var $elm$time$Time$Posix = function (a) {
-	return {$: 'Posix', a: a};
-};
-var $elm$time$Time$millisToPosix = $elm$time$Time$Posix;
-var $elm$time$Time$now = _Time_now($elm$time$Time$millisToPosix);
-var $elm$time$Time$onSelfMsg = F3(
-	function (router, interval, state) {
-		var _v0 = A2($elm$core$Dict$get, interval, state.taggers);
-		if (_v0.$ === 'Nothing') {
-			return $elm$core$Task$succeed(state);
-		} else {
-			var taggers = _v0.a;
-			var tellTaggers = function (time) {
-				return $elm$core$Task$sequence(
-					A2(
-						$elm$core$List$map,
-						function (tagger) {
-							return A2(
-								$elm$core$Platform$sendToApp,
-								router,
-								tagger(time));
-						},
-						taggers));
-			};
-			return A2(
-				$elm$core$Task$andThen,
-				function (_v1) {
-					return $elm$core$Task$succeed(state);
-				},
-				A2($elm$core$Task$andThen, tellTaggers, $elm$time$Time$now));
-		}
-	});
-var $elm$time$Time$subMap = F2(
-	function (f, _v0) {
-		var interval = _v0.a;
-		var tagger = _v0.b;
-		return A2(
-			$elm$time$Time$Every,
-			interval,
-			A2($elm$core$Basics$composeL, f, tagger));
-	});
-_Platform_effectManagers['Time'] = _Platform_createManager($elm$time$Time$init, $elm$time$Time$onEffects, $elm$time$Time$onSelfMsg, 0, $elm$time$Time$subMap);
-var $elm$time$Time$subscription = _Platform_leaf('Time');
-var $elm$time$Time$every = F2(
-	function (interval, tagger) {
-		return $elm$time$Time$subscription(
-			A2($elm$time$Time$Every, interval, tagger));
-	});
-var $author$project$Main$NoMsg = {$: 'NoMsg'};
-var $author$project$Main$bubbleSortInternal = F2(
-	function (lb, bs) {
-		return $author$project$Main$NoMsg;
-	});
-var $author$project$Main$bubbleSortState = {last_bar: 0};
-var $author$project$Main$bubbleSortFn = F2(
-	function (b, l) {
-		if (b.$ === 'BubbleSortState') {
-			var bs = b.a;
-			return A2($author$project$Main$bubbleSortInternal, bs, l);
-		} else {
-			return A2($author$project$Main$bubbleSortInternal, $author$project$Main$bubbleSortState, l);
-		}
-	});
-var $author$project$Main$SwapBars = F2(
-	function (a, b) {
-		return {$: 'SwapBars', a: a, b: b};
-	});
-var $author$project$Main$insertionSortFn = function (l) {
-	var insertionSortFnI = F2(
-		function (idx, b) {
-			insertionSortFnI:
-			while (true) {
-				if (b.b && b.b.b) {
-					var b1 = b.a;
-					var _v1 = b.b;
-					var b2 = _v1.a;
-					var bs = _v1.b;
-					if (_Utils_cmp(b1, b2) > 0) {
-						return A2($author$project$Main$SwapBars, idx, idx + 1);
-					} else {
-						var $temp$idx = idx + 1,
-							$temp$b = A2($elm$core$List$cons, b2, bs);
-						idx = $temp$idx;
-						b = $temp$b;
-						continue insertionSortFnI;
-					}
-				} else {
-					return $author$project$Main$NoMsg;
-				}
-			}
-		});
-	return A2(insertionSortFnI, 0, l);
-};
-var $author$project$Main$stepAlgorithm = F2(
-	function (m, _v0) {
-		var _v1 = m.active_algorithm;
-		if (_v1.$ === 'Nothing') {
-			return $author$project$Main$NoMsg;
-		} else {
-			switch (_v1.a.$) {
-				case 'InsertionSort':
-					var _v2 = _v1.a;
-					return $author$project$Main$insertionSortFn(m.bars);
-				case 'BubbleSort':
-					var _v3 = _v1.a;
-					return A2($author$project$Main$bubbleSortFn, m.algorithm_state, m.bars);
-				default:
-					return $author$project$Main$NoMsg;
-			}
-		}
-	});
-var $author$project$Main$subscriptions = function (model) {
-	return A2(
-		$elm$time$Time$every,
-		model.tickspeed + 1000,
-		$author$project$Main$stepAlgorithm(model));
-};
-var $pzp1997$assoc_list$AssocList$get = F2(
-	function (targetKey, _v0) {
-		get:
-		while (true) {
-			var alist = _v0.a;
-			if (!alist.b) {
-				return $elm$core$Maybe$Nothing;
-			} else {
-				var _v2 = alist.a;
-				var key = _v2.a;
-				var value = _v2.b;
-				var rest = alist.b;
-				if (_Utils_eq(key, targetKey)) {
-					return $elm$core$Maybe$Just(value);
-				} else {
-					var $temp$targetKey = targetKey,
-						$temp$_v0 = $pzp1997$assoc_list$AssocList$D(rest);
-					targetKey = $temp$targetKey;
-					_v0 = $temp$_v0;
-					continue get;
-				}
-			}
-		}
-	});
-var $elm$core$Debug$log = _Debug_log;
-var $pzp1997$assoc_list$AssocList$map = F2(
-	function (alter, _v0) {
-		var alist = _v0.a;
-		return $pzp1997$assoc_list$AssocList$D(
-			A2(
-				$elm$core$List$map,
-				function (_v1) {
-					var key = _v1.a;
-					var value = _v1.b;
-					return _Utils_Tuple2(
-						key,
-						A2(alter, key, value));
-				},
-				alist));
-	});
-var $author$project$Main$activateAlgorithm = F2(
-	function (model, algoT) {
-		var _v0 = A2($pzp1997$assoc_list$AssocList$get, algoT, model.algorithms);
-		if (_v0.$ === 'Nothing') {
-			return A2($elm$core$Debug$log, 'ERROR: Couldn\'t find algorithm', model);
-		} else {
-			var algo = _v0.a;
-			var now_active = !algo.active;
-			var all_inactive = A2(
-				$pzp1997$assoc_list$AssocList$map,
-				F2(
-					function (_v1, x) {
-						return _Utils_update(
-							x,
-							{active: false});
-					}),
-				model.algorithms);
-			var algos = A3(
-				$pzp1997$assoc_list$AssocList$insert,
-				algoT,
-				_Utils_update(
-					algo,
-					{active: now_active}),
-				all_inactive);
-			return _Utils_update(
-				model,
-				{
-					active_algorithm: now_active ? $elm$core$Maybe$Just(algoT) : $elm$core$Maybe$Nothing,
-					algorithms: algos
-				});
-		}
-	});
-var $author$project$Bars$barsSorted = function (bars) {
-	if (bars.b && bars.b.b) {
-		var b = bars.a;
-		var _v1 = bars.b;
-		var b2 = _v1.a;
-		var bs = _v1.b;
-		return (_Utils_cmp(b, b2) < 1) && $author$project$Bars$barsSorted(
-			A2($elm$core$List$cons, b2, bs));
-	} else {
-		return true;
-	}
-};
-var $author$project$Main$buyAlgorithm = F2(
-	function (model, algoT) {
-		var _v0 = A2($pzp1997$assoc_list$AssocList$get, algoT, model.algorithms);
-		if (_v0.$ === 'Nothing') {
-			return A2($elm$core$Debug$log, 'ERROR: Couldn\'t find algorithm', model);
-		} else {
-			var algo = _v0.a;
-			var algos = A3(
-				$pzp1997$assoc_list$AssocList$insert,
-				algoT,
-				_Utils_update(
-					algo,
-					{unlocked: true}),
-				model.algorithms);
-			return _Utils_update(
-				model,
-				{algorithms: algos, coins: model.coins - algo.price});
-		}
-	});
-var $author$project$Main$AddCoins = function (a) {
-	return {$: 'AddCoins', a: a};
-};
 var $author$project$Main$GenerateBars = function (a) {
 	return {$: 'GenerateBars', a: a};
 };
@@ -11056,6 +10629,22 @@ var $elm$random$Random$initialSeed = function (x) {
 	return $elm$random$Random$next(
 		A2($elm$random$Random$Seed, state2, incr));
 };
+var $elm$time$Time$Name = function (a) {
+	return {$: 'Name', a: a};
+};
+var $elm$time$Time$Offset = function (a) {
+	return {$: 'Offset', a: a};
+};
+var $elm$time$Time$Zone = F2(
+	function (a, b) {
+		return {$: 'Zone', a: a, b: b};
+	});
+var $elm$time$Time$customZone = $elm$time$Time$Zone;
+var $elm$time$Time$Posix = function (a) {
+	return {$: 'Posix', a: a};
+};
+var $elm$time$Time$millisToPosix = $elm$time$Time$Posix;
+var $elm$time$Time$now = _Time_now($elm$time$Time$millisToPosix);
 var $elm$time$Time$posixToMillis = function (_v0) {
 	var millis = _v0.a;
 	return millis;
@@ -11207,9 +10796,425 @@ var $author$project$Main$generateRandomBars = function (cnt) {
 		$author$project$Main$GenerateBars,
 		$author$project$Bars$randomBars(cnt));
 };
+var $pzp1997$assoc_list$AssocList$D = function (a) {
+	return {$: 'D', a: a};
+};
+var $elm$core$List$filter = F2(
+	function (isGood, list) {
+		return A3(
+			$elm$core$List$foldr,
+			F2(
+				function (x, xs) {
+					return isGood(x) ? A2($elm$core$List$cons, x, xs) : xs;
+				}),
+			_List_Nil,
+			list);
+	});
+var $pzp1997$assoc_list$AssocList$remove = F2(
+	function (targetKey, _v0) {
+		var alist = _v0.a;
+		return $pzp1997$assoc_list$AssocList$D(
+			A2(
+				$elm$core$List$filter,
+				function (_v1) {
+					var key = _v1.a;
+					return !_Utils_eq(key, targetKey);
+				},
+				alist));
+	});
+var $pzp1997$assoc_list$AssocList$insert = F3(
+	function (key, value, dict) {
+		var _v0 = A2($pzp1997$assoc_list$AssocList$remove, key, dict);
+		var alteredAlist = _v0.a;
+		return $pzp1997$assoc_list$AssocList$D(
+			A2(
+				$elm$core$List$cons,
+				_Utils_Tuple2(key, value),
+				alteredAlist));
+	});
+var $pzp1997$assoc_list$AssocList$fromList = function (alist) {
+	return A3(
+		$elm$core$List$foldl,
+		F2(
+			function (_v0, result) {
+				var key = _v0.a;
+				var value = _v0.b;
+				return A3($pzp1997$assoc_list$AssocList$insert, key, value, result);
+			}),
+		$pzp1997$assoc_list$AssocList$D(_List_Nil),
+		alist);
+};
+var $author$project$Bars$BubbleSort = {$: 'BubbleSort'};
+var $author$project$Bars$kBubbleSort = {active: false, algo: $author$project$Bars$BubbleSort, name: 'BubbleSort', price: 10, unlocked: false};
+var $author$project$Bars$InsertionSort = {$: 'InsertionSort'};
+var $author$project$Bars$kInsertionSort = {active: false, algo: $author$project$Bars$InsertionSort, name: 'InsertionSort', price: 10, unlocked: false};
+var $author$project$Bars$QuickSort = {$: 'QuickSort'};
+var $author$project$Bars$kQuickSort = {active: false, algo: $author$project$Bars$QuickSort, name: 'QuickSort', price: 30, unlocked: false};
+var $author$project$Bars$kAlgorithms = _List_fromArray(
+	[$author$project$Bars$kBubbleSort, $author$project$Bars$kInsertionSort, $author$project$Bars$kQuickSort]);
+var $author$project$Bars$kAlgorithmDict = $pzp1997$assoc_list$AssocList$fromList(
+	A2(
+		$elm$core$List$map,
+		function (x) {
+			return _Utils_Tuple2(x.algo, x);
+		},
+		$author$project$Bars$kAlgorithms));
+var $author$project$Main$init = function (_v0) {
+	return _Utils_Tuple2(
+		A7($author$project$Main$Model, 0, 1000, $elm$core$Maybe$Nothing, $elm$core$Array$empty, $author$project$Bars$kAlgorithmDict, $elm$core$Maybe$Nothing, $author$project$Main$NoState),
+		$author$project$Main$generateRandomBars(4));
+};
+var $elm$time$Time$Every = F2(
+	function (a, b) {
+		return {$: 'Every', a: a, b: b};
+	});
+var $elm$time$Time$State = F2(
+	function (taggers, processes) {
+		return {processes: processes, taggers: taggers};
+	});
+var $elm$time$Time$init = $elm$core$Task$succeed(
+	A2($elm$time$Time$State, $elm$core$Dict$empty, $elm$core$Dict$empty));
+var $elm$time$Time$addMySub = F2(
+	function (_v0, state) {
+		var interval = _v0.a;
+		var tagger = _v0.b;
+		var _v1 = A2($elm$core$Dict$get, interval, state);
+		if (_v1.$ === 'Nothing') {
+			return A3(
+				$elm$core$Dict$insert,
+				interval,
+				_List_fromArray(
+					[tagger]),
+				state);
+		} else {
+			var taggers = _v1.a;
+			return A3(
+				$elm$core$Dict$insert,
+				interval,
+				A2($elm$core$List$cons, tagger, taggers),
+				state);
+		}
+	});
+var $elm$core$Process$kill = _Scheduler_kill;
+var $elm$core$Platform$sendToSelf = _Platform_sendToSelf;
+var $elm$time$Time$setInterval = _Time_setInterval;
+var $elm$core$Process$spawn = _Scheduler_spawn;
+var $elm$time$Time$spawnHelp = F3(
+	function (router, intervals, processes) {
+		if (!intervals.b) {
+			return $elm$core$Task$succeed(processes);
+		} else {
+			var interval = intervals.a;
+			var rest = intervals.b;
+			var spawnTimer = $elm$core$Process$spawn(
+				A2(
+					$elm$time$Time$setInterval,
+					interval,
+					A2($elm$core$Platform$sendToSelf, router, interval)));
+			var spawnRest = function (id) {
+				return A3(
+					$elm$time$Time$spawnHelp,
+					router,
+					rest,
+					A3($elm$core$Dict$insert, interval, id, processes));
+			};
+			return A2($elm$core$Task$andThen, spawnRest, spawnTimer);
+		}
+	});
+var $elm$time$Time$onEffects = F3(
+	function (router, subs, _v0) {
+		var processes = _v0.processes;
+		var rightStep = F3(
+			function (_v6, id, _v7) {
+				var spawns = _v7.a;
+				var existing = _v7.b;
+				var kills = _v7.c;
+				return _Utils_Tuple3(
+					spawns,
+					existing,
+					A2(
+						$elm$core$Task$andThen,
+						function (_v5) {
+							return kills;
+						},
+						$elm$core$Process$kill(id)));
+			});
+		var newTaggers = A3($elm$core$List$foldl, $elm$time$Time$addMySub, $elm$core$Dict$empty, subs);
+		var leftStep = F3(
+			function (interval, taggers, _v4) {
+				var spawns = _v4.a;
+				var existing = _v4.b;
+				var kills = _v4.c;
+				return _Utils_Tuple3(
+					A2($elm$core$List$cons, interval, spawns),
+					existing,
+					kills);
+			});
+		var bothStep = F4(
+			function (interval, taggers, id, _v3) {
+				var spawns = _v3.a;
+				var existing = _v3.b;
+				var kills = _v3.c;
+				return _Utils_Tuple3(
+					spawns,
+					A3($elm$core$Dict$insert, interval, id, existing),
+					kills);
+			});
+		var _v1 = A6(
+			$elm$core$Dict$merge,
+			leftStep,
+			bothStep,
+			rightStep,
+			newTaggers,
+			processes,
+			_Utils_Tuple3(
+				_List_Nil,
+				$elm$core$Dict$empty,
+				$elm$core$Task$succeed(_Utils_Tuple0)));
+		var spawnList = _v1.a;
+		var existingDict = _v1.b;
+		var killTask = _v1.c;
+		return A2(
+			$elm$core$Task$andThen,
+			function (newProcesses) {
+				return $elm$core$Task$succeed(
+					A2($elm$time$Time$State, newTaggers, newProcesses));
+			},
+			A2(
+				$elm$core$Task$andThen,
+				function (_v2) {
+					return A3($elm$time$Time$spawnHelp, router, spawnList, existingDict);
+				},
+				killTask));
+	});
+var $elm$time$Time$onSelfMsg = F3(
+	function (router, interval, state) {
+		var _v0 = A2($elm$core$Dict$get, interval, state.taggers);
+		if (_v0.$ === 'Nothing') {
+			return $elm$core$Task$succeed(state);
+		} else {
+			var taggers = _v0.a;
+			var tellTaggers = function (time) {
+				return $elm$core$Task$sequence(
+					A2(
+						$elm$core$List$map,
+						function (tagger) {
+							return A2(
+								$elm$core$Platform$sendToApp,
+								router,
+								tagger(time));
+						},
+						taggers));
+			};
+			return A2(
+				$elm$core$Task$andThen,
+				function (_v1) {
+					return $elm$core$Task$succeed(state);
+				},
+				A2($elm$core$Task$andThen, tellTaggers, $elm$time$Time$now));
+		}
+	});
+var $elm$time$Time$subMap = F2(
+	function (f, _v0) {
+		var interval = _v0.a;
+		var tagger = _v0.b;
+		return A2(
+			$elm$time$Time$Every,
+			interval,
+			A2($elm$core$Basics$composeL, f, tagger));
+	});
+_Platform_effectManagers['Time'] = _Platform_createManager($elm$time$Time$init, $elm$time$Time$onEffects, $elm$time$Time$onSelfMsg, 0, $elm$time$Time$subMap);
+var $elm$time$Time$subscription = _Platform_leaf('Time');
+var $elm$time$Time$every = F2(
+	function (interval, tagger) {
+		return $elm$time$Time$subscription(
+			A2($elm$time$Time$Every, interval, tagger));
+	});
+var $author$project$Main$NoMsg = {$: 'NoMsg'};
+var $author$project$Main$bubbleSortInternal = F2(
+	function (lb, bs) {
+		return $author$project$Main$NoMsg;
+	});
+var $author$project$Main$bubbleSortState = {last_bar: 0};
+var $author$project$Main$bubbleSortFn = F2(
+	function (b, l) {
+		if (b.$ === 'BubbleSortState') {
+			var bs = b.a;
+			return A2($author$project$Main$bubbleSortInternal, bs, l);
+		} else {
+			return A2($author$project$Main$bubbleSortInternal, $author$project$Main$bubbleSortState, l);
+		}
+	});
+var $author$project$Main$SwapBars = F2(
+	function (a, b) {
+		return {$: 'SwapBars', a: a, b: b};
+	});
+var $author$project$Main$insertionSortFn = function (l) {
+	var insertionSortFnI = F2(
+		function (idx, b) {
+			insertionSortFnI:
+			while (true) {
+				if (b.b && b.b.b) {
+					var b1 = b.a;
+					var _v1 = b.b;
+					var b2 = _v1.a;
+					var bs = _v1.b;
+					if (_Utils_cmp(b1, b2) > 0) {
+						return A2($author$project$Main$SwapBars, idx, idx + 1);
+					} else {
+						var $temp$idx = idx + 1,
+							$temp$b = A2($elm$core$List$cons, b2, bs);
+						idx = $temp$idx;
+						b = $temp$b;
+						continue insertionSortFnI;
+					}
+				} else {
+					return $author$project$Main$NoMsg;
+				}
+			}
+		});
+	return A2(
+		insertionSortFnI,
+		0,
+		$elm$core$Array$toList(l));
+};
+var $author$project$Main$stepAlgorithm = F2(
+	function (m, _v0) {
+		var _v1 = m.active_algorithm;
+		if (_v1.$ === 'Nothing') {
+			return $author$project$Main$NoMsg;
+		} else {
+			switch (_v1.a.$) {
+				case 'InsertionSort':
+					var _v2 = _v1.a;
+					return $author$project$Main$insertionSortFn(m.bars);
+				case 'BubbleSort':
+					var _v3 = _v1.a;
+					return A2($author$project$Main$bubbleSortFn, m.algorithm_state, m.bars);
+				default:
+					return $author$project$Main$NoMsg;
+			}
+		}
+	});
+var $author$project$Main$subscriptions = function (model) {
+	return A2(
+		$elm$time$Time$every,
+		model.tickspeed + 1000,
+		$author$project$Main$stepAlgorithm(model));
+};
+var $pzp1997$assoc_list$AssocList$get = F2(
+	function (targetKey, _v0) {
+		get:
+		while (true) {
+			var alist = _v0.a;
+			if (!alist.b) {
+				return $elm$core$Maybe$Nothing;
+			} else {
+				var _v2 = alist.a;
+				var key = _v2.a;
+				var value = _v2.b;
+				var rest = alist.b;
+				if (_Utils_eq(key, targetKey)) {
+					return $elm$core$Maybe$Just(value);
+				} else {
+					var $temp$targetKey = targetKey,
+						$temp$_v0 = $pzp1997$assoc_list$AssocList$D(rest);
+					targetKey = $temp$targetKey;
+					_v0 = $temp$_v0;
+					continue get;
+				}
+			}
+		}
+	});
+var $elm$core$Debug$log = _Debug_log;
+var $pzp1997$assoc_list$AssocList$map = F2(
+	function (alter, _v0) {
+		var alist = _v0.a;
+		return $pzp1997$assoc_list$AssocList$D(
+			A2(
+				$elm$core$List$map,
+				function (_v1) {
+					var key = _v1.a;
+					var value = _v1.b;
+					return _Utils_Tuple2(
+						key,
+						A2(alter, key, value));
+				},
+				alist));
+	});
+var $author$project$Main$activateAlgorithm = F2(
+	function (model, algoT) {
+		var _v0 = A2($pzp1997$assoc_list$AssocList$get, algoT, model.algorithms);
+		if (_v0.$ === 'Nothing') {
+			return A2($elm$core$Debug$log, 'ERROR: Couldn\'t find algorithm', model);
+		} else {
+			var algo = _v0.a;
+			var now_active = !algo.active;
+			var all_inactive = A2(
+				$pzp1997$assoc_list$AssocList$map,
+				F2(
+					function (_v1, x) {
+						return _Utils_update(
+							x,
+							{active: false});
+					}),
+				model.algorithms);
+			var algos = A3(
+				$pzp1997$assoc_list$AssocList$insert,
+				algoT,
+				_Utils_update(
+					algo,
+					{active: now_active}),
+				all_inactive);
+			return _Utils_update(
+				model,
+				{
+					active_algorithm: now_active ? $elm$core$Maybe$Just(algoT) : $elm$core$Maybe$Nothing,
+					algorithms: algos
+				});
+		}
+	});
+var $author$project$Bars$barsSortedL = function (bars) {
+	if (bars.b && bars.b.b) {
+		var b = bars.a;
+		var _v1 = bars.b;
+		var b2 = _v1.a;
+		var bs = _v1.b;
+		return (_Utils_cmp(b, b2) < 1) && $author$project$Bars$barsSortedL(
+			A2($elm$core$List$cons, b2, bs));
+	} else {
+		return true;
+	}
+};
+var $author$project$Main$buyAlgorithm = F2(
+	function (model, algoT) {
+		var _v0 = A2($pzp1997$assoc_list$AssocList$get, algoT, model.algorithms);
+		if (_v0.$ === 'Nothing') {
+			return A2($elm$core$Debug$log, 'ERROR: Couldn\'t find algorithm', model);
+		} else {
+			var algo = _v0.a;
+			var algos = A3(
+				$pzp1997$assoc_list$AssocList$insert,
+				algoT,
+				_Utils_update(
+					algo,
+					{unlocked: true}),
+				model.algorithms);
+			return _Utils_update(
+				model,
+				{algorithms: algos, coins: model.coins - algo.price});
+		}
+	});
+var $author$project$Main$AddCoins = function (a) {
+	return {$: 'AddCoins', a: a};
+};
+var $author$project$Bars$barsSorted = function (a) {
+	return $author$project$Bars$barsSortedL(
+		$elm$core$Array$toList(a));
+};
 var $author$project$Main$checkSortedAndCmd = function (model) {
 	if ($author$project$Bars$barsSorted(model.bars)) {
-		var count = $elm$core$List$length(model.bars);
+		var count = $elm$core$Array$length(model.bars);
 		return $elm$core$Platform$Cmd$batch(
 			_List_fromArray(
 				[
@@ -11229,14 +11234,18 @@ var $elm$core$Basics$min = F2(
 	function (x, y) {
 		return (_Utils_cmp(x, y) < 0) ? x : y;
 	});
+var $author$project$Main$msgToCmd = function (msg) {
+	return A2(
+		$elm$core$Task$perform,
+		function (_v0) {
+			return msg;
+		},
+		$elm$core$Task$succeed(_Utils_Tuple0));
+};
 var $author$project$Main$taskSwapBars = F2(
 	function (mi, ma) {
-		return A2(
-			$elm$core$Task$perform,
-			function (_v0) {
-				return A2($author$project$Main$SwapBars, mi, ma);
-			},
-			$elm$core$Task$succeed(_Utils_Tuple0));
+		return $author$project$Main$msgToCmd(
+			A2($author$project$Main$SwapBars, mi, ma));
 	});
 var $author$project$Main$clickBar = F2(
 	function (model, clicked) {
@@ -11268,182 +11277,63 @@ var $author$project$Main$clickBar = F2(
 			}
 		}
 	});
-var $elm$core$List$takeReverse = F3(
-	function (n, list, kept) {
-		takeReverse:
-		while (true) {
-			if (n <= 0) {
-				return kept;
-			} else {
-				if (!list.b) {
-					return kept;
-				} else {
-					var x = list.a;
-					var xs = list.b;
-					var $temp$n = n - 1,
-						$temp$list = xs,
-						$temp$kept = A2($elm$core$List$cons, x, kept);
-					n = $temp$n;
-					list = $temp$list;
-					kept = $temp$kept;
-					continue takeReverse;
-				}
-			}
-		}
-	});
-var $elm$core$List$takeTailRec = F2(
-	function (n, list) {
-		return $elm$core$List$reverse(
-			A3($elm$core$List$takeReverse, n, list, _List_Nil));
-	});
-var $elm$core$List$takeFast = F3(
-	function (ctr, n, list) {
-		if (n <= 0) {
-			return _List_Nil;
+var $elm$core$Array$setHelp = F4(
+	function (shift, index, value, tree) {
+		var pos = $elm$core$Array$bitMask & (index >>> shift);
+		var _v0 = A2($elm$core$Elm$JsArray$unsafeGet, pos, tree);
+		if (_v0.$ === 'SubTree') {
+			var subTree = _v0.a;
+			var newSub = A4($elm$core$Array$setHelp, shift - $elm$core$Array$shiftStep, index, value, subTree);
+			return A3(
+				$elm$core$Elm$JsArray$unsafeSet,
+				pos,
+				$elm$core$Array$SubTree(newSub),
+				tree);
 		} else {
-			var _v0 = _Utils_Tuple2(n, list);
-			_v0$1:
-			while (true) {
-				_v0$5:
-				while (true) {
-					if (!_v0.b.b) {
-						return list;
-					} else {
-						if (_v0.b.b.b) {
-							switch (_v0.a) {
-								case 1:
-									break _v0$1;
-								case 2:
-									var _v2 = _v0.b;
-									var x = _v2.a;
-									var _v3 = _v2.b;
-									var y = _v3.a;
-									return _List_fromArray(
-										[x, y]);
-								case 3:
-									if (_v0.b.b.b.b) {
-										var _v4 = _v0.b;
-										var x = _v4.a;
-										var _v5 = _v4.b;
-										var y = _v5.a;
-										var _v6 = _v5.b;
-										var z = _v6.a;
-										return _List_fromArray(
-											[x, y, z]);
-									} else {
-										break _v0$5;
-									}
-								default:
-									if (_v0.b.b.b.b && _v0.b.b.b.b.b) {
-										var _v7 = _v0.b;
-										var x = _v7.a;
-										var _v8 = _v7.b;
-										var y = _v8.a;
-										var _v9 = _v8.b;
-										var z = _v9.a;
-										var _v10 = _v9.b;
-										var w = _v10.a;
-										var tl = _v10.b;
-										return (ctr > 1000) ? A2(
-											$elm$core$List$cons,
-											x,
-											A2(
-												$elm$core$List$cons,
-												y,
-												A2(
-													$elm$core$List$cons,
-													z,
-													A2(
-														$elm$core$List$cons,
-														w,
-														A2($elm$core$List$takeTailRec, n - 4, tl))))) : A2(
-											$elm$core$List$cons,
-											x,
-											A2(
-												$elm$core$List$cons,
-												y,
-												A2(
-													$elm$core$List$cons,
-													z,
-													A2(
-														$elm$core$List$cons,
-														w,
-														A3($elm$core$List$takeFast, ctr + 1, n - 4, tl)))));
-									} else {
-										break _v0$5;
-									}
-							}
-						} else {
-							if (_v0.a === 1) {
-								break _v0$1;
-							} else {
-								break _v0$5;
-							}
-						}
-					}
-				}
-				return list;
-			}
-			var _v1 = _v0.b;
-			var x = _v1.a;
-			return _List_fromArray(
-				[x]);
+			var values = _v0.a;
+			var newLeaf = A3($elm$core$Elm$JsArray$unsafeSet, $elm$core$Array$bitMask & index, value, values);
+			return A3(
+				$elm$core$Elm$JsArray$unsafeSet,
+				pos,
+				$elm$core$Array$Leaf(newLeaf),
+				tree);
 		}
 	});
-var $elm$core$List$take = F2(
-	function (n, list) {
-		return A3($elm$core$List$takeFast, 0, n, list);
-	});
-var $author$project$Bars$splitList = F2(
-	function (i, l) {
-		var lasts = A2($elm$core$List$drop, i, l);
-		var firsts = A2($elm$core$List$take, i, l);
-		if (lasts.b) {
-			var x = lasts.a;
-			var xs = lasts.b;
-			return $elm$core$Result$Ok(
-				_Utils_Tuple3(firsts, x, xs));
-		} else {
-			return $elm$core$Result$Err(
-				'Can\'t split list at index ' + $elm$core$String$fromInt(i));
-		}
-	});
-var $elm$core$Result$withDefault = F2(
-	function (def, result) {
-		if (result.$ === 'Ok') {
-			var a = result.a;
-			return a;
-		} else {
-			return def;
-		}
+var $elm$core$Array$set = F3(
+	function (index, value, array) {
+		var len = array.a;
+		var startShift = array.b;
+		var tree = array.c;
+		var tail = array.d;
+		return ((index < 0) || (_Utils_cmp(index, len) > -1)) ? array : ((_Utils_cmp(
+			index,
+			$elm$core$Array$tailIndex(len)) > -1) ? A4(
+			$elm$core$Array$Array_elm_builtin,
+			len,
+			startShift,
+			tree,
+			A3($elm$core$Elm$JsArray$unsafeSet, $elm$core$Array$bitMask & index, value, tail)) : A4(
+			$elm$core$Array$Array_elm_builtin,
+			len,
+			startShift,
+			A4($elm$core$Array$setHelp, startShift, index, value, tree),
+			tail));
 	});
 var $author$project$Bars$swapBars = F3(
 	function (bars, i1, i2) {
-		var _v0 = A2(
-			$elm$core$Result$withDefault,
-			_Utils_Tuple3(_List_Nil, 0, _List_Nil),
-			A2($author$project$Bars$splitList, i1, bars));
-		var firsts = _v0.a;
-		var e1 = _v0.b;
-		var tmp = _v0.c;
-		var _v1 = A2(
-			$elm$core$Result$withDefault,
-			_Utils_Tuple3(_List_Nil, 0, _List_Nil),
-			A2($author$project$Bars$splitList, (i2 - i1) - 1, tmp));
-		var mids = _v1.a;
-		var e2 = _v1.b;
-		var lasts = _v1.c;
-		return _Utils_ap(
-			firsts,
-			_Utils_ap(
-				_List_fromArray(
-					[e2]),
-				_Utils_ap(
-					mids,
-					_Utils_ap(
-						_List_fromArray(
-							[e1]),
-						lasts))));
+		var a2 = A2(
+			$elm$core$Maybe$withDefault,
+			0,
+			A2($elm$core$Array$get, i2, bars));
+		var a1 = A2(
+			$elm$core$Maybe$withDefault,
+			0,
+			A2($elm$core$Array$get, i1, bars));
+		return A3(
+			$elm$core$Array$set,
+			i1,
+			a2,
+			A3($elm$core$Array$set, i2, a1, bars));
 	});
 var $author$project$Main$tickspeedPrice = 10;
 var $author$project$Main$update = F2(
@@ -11467,13 +11357,15 @@ var $author$project$Main$update = F2(
 					$elm$core$Platform$Cmd$none);
 			case 'GenerateBars':
 				var newBars = msg.a;
-				return $author$project$Bars$barsSorted(newBars) ? _Utils_Tuple2(
+				return $author$project$Bars$barsSortedL(newBars) ? _Utils_Tuple2(
 					model,
 					$author$project$Main$generateRandomBars(
 						$elm$core$List$length(newBars))) : _Utils_Tuple2(
 					_Utils_update(
 						model,
-						{bars: newBars}),
+						{
+							bars: $elm$core$Array$fromList(newBars)
+						}),
 					$elm$core$Platform$Cmd$none);
 			case 'ChangeBarCount':
 				var bar_count = msg.a;
@@ -11507,7 +11399,9 @@ var $author$project$Main$update = F2(
 				var newBars = msg.a;
 				var new_model = _Utils_update(
 					model,
-					{bars: newBars});
+					{
+						bars: $elm$core$Array$fromList(newBars)
+					});
 				return _Utils_Tuple2(
 					new_model,
 					$author$project$Main$checkSortedAndCmd(new_model));
@@ -12565,6 +12459,132 @@ var $elm$core$List$tail = function (list) {
 		return $elm$core$Maybe$Nothing;
 	}
 };
+var $elm$core$List$takeReverse = F3(
+	function (n, list, kept) {
+		takeReverse:
+		while (true) {
+			if (n <= 0) {
+				return kept;
+			} else {
+				if (!list.b) {
+					return kept;
+				} else {
+					var x = list.a;
+					var xs = list.b;
+					var $temp$n = n - 1,
+						$temp$list = xs,
+						$temp$kept = A2($elm$core$List$cons, x, kept);
+					n = $temp$n;
+					list = $temp$list;
+					kept = $temp$kept;
+					continue takeReverse;
+				}
+			}
+		}
+	});
+var $elm$core$List$takeTailRec = F2(
+	function (n, list) {
+		return $elm$core$List$reverse(
+			A3($elm$core$List$takeReverse, n, list, _List_Nil));
+	});
+var $elm$core$List$takeFast = F3(
+	function (ctr, n, list) {
+		if (n <= 0) {
+			return _List_Nil;
+		} else {
+			var _v0 = _Utils_Tuple2(n, list);
+			_v0$1:
+			while (true) {
+				_v0$5:
+				while (true) {
+					if (!_v0.b.b) {
+						return list;
+					} else {
+						if (_v0.b.b.b) {
+							switch (_v0.a) {
+								case 1:
+									break _v0$1;
+								case 2:
+									var _v2 = _v0.b;
+									var x = _v2.a;
+									var _v3 = _v2.b;
+									var y = _v3.a;
+									return _List_fromArray(
+										[x, y]);
+								case 3:
+									if (_v0.b.b.b.b) {
+										var _v4 = _v0.b;
+										var x = _v4.a;
+										var _v5 = _v4.b;
+										var y = _v5.a;
+										var _v6 = _v5.b;
+										var z = _v6.a;
+										return _List_fromArray(
+											[x, y, z]);
+									} else {
+										break _v0$5;
+									}
+								default:
+									if (_v0.b.b.b.b && _v0.b.b.b.b.b) {
+										var _v7 = _v0.b;
+										var x = _v7.a;
+										var _v8 = _v7.b;
+										var y = _v8.a;
+										var _v9 = _v8.b;
+										var z = _v9.a;
+										var _v10 = _v9.b;
+										var w = _v10.a;
+										var tl = _v10.b;
+										return (ctr > 1000) ? A2(
+											$elm$core$List$cons,
+											x,
+											A2(
+												$elm$core$List$cons,
+												y,
+												A2(
+													$elm$core$List$cons,
+													z,
+													A2(
+														$elm$core$List$cons,
+														w,
+														A2($elm$core$List$takeTailRec, n - 4, tl))))) : A2(
+											$elm$core$List$cons,
+											x,
+											A2(
+												$elm$core$List$cons,
+												y,
+												A2(
+													$elm$core$List$cons,
+													z,
+													A2(
+														$elm$core$List$cons,
+														w,
+														A3($elm$core$List$takeFast, ctr + 1, n - 4, tl)))));
+									} else {
+										break _v0$5;
+									}
+							}
+						} else {
+							if (_v0.a === 1) {
+								break _v0$1;
+							} else {
+								break _v0$5;
+							}
+						}
+					}
+				}
+				return list;
+			}
+			var _v1 = _v0.b;
+			var x = _v1.a;
+			return _List_fromArray(
+				[x]);
+		}
+	});
+var $elm$core$List$take = F2(
+	function (n, list) {
+		return A3($elm$core$List$takeFast, 0, n, list);
+	});
 var $rtfeldman$elm_css$Css$Preprocess$Resolve$toDocumentRule = F5(
 	function (str1, str2, str3, str4, declaration) {
 		if (declaration.$ === 'StyleBlockDeclaration') {
@@ -13383,13 +13403,15 @@ var $rtfeldman$elm_css$Svg$Styled$rect = $rtfeldman$elm_css$Svg$Styled$node('rec
 var $rtfeldman$elm_css$Svg$Styled$Attributes$width = $rtfeldman$elm_css$VirtualDom$Styled$attribute('width');
 var $rtfeldman$elm_css$Svg$Styled$Attributes$x = $rtfeldman$elm_css$VirtualDom$Styled$attribute('x');
 var $rtfeldman$elm_css$Svg$Styled$Attributes$y = $rtfeldman$elm_css$VirtualDom$Styled$attribute('y');
-var $author$project$Main$drawBarsX = F3(
-	function (statics, idx, bars) {
-		if (!bars.b) {
+var $author$project$Main$drawBarsX = F2(
+	function (statics, idxd_bars) {
+		if (!idxd_bars.b) {
 			return _List_Nil;
 		} else {
-			var b = bars.a;
-			var bs = bars.b;
+			var _v1 = idxd_bars.a;
+			var idx = _v1.a;
+			var b = _v1.b;
+			var bs = idxd_bars.b;
 			return A2(
 				$elm$core$List$cons,
 				A2(
@@ -13418,18 +13440,36 @@ var $author$project$Main$drawBarsX = F3(
 								$author$project$Main$ClickBar(idx))
 							])),
 					_List_Nil),
-				A3($author$project$Main$drawBarsX, statics, idx + 1, bs));
+				A2($author$project$Main$drawBarsX, statics, bs));
 		}
 	});
 var $author$project$Main$kHEIGHT = 600;
+var $elm$core$Array$toIndexedList = function (array) {
+	var len = array.a;
+	var helper = F2(
+		function (entry, _v0) {
+			var index = _v0.a;
+			var list = _v0.b;
+			return _Utils_Tuple2(
+				index - 1,
+				A2(
+					$elm$core$List$cons,
+					_Utils_Tuple2(index, entry),
+					list));
+		});
+	return A3(
+		$elm$core$Array$foldr,
+		helper,
+		_Utils_Tuple2(len - 1, _List_Nil),
+		array).b;
+};
 var $author$project$Main$drawBars = function (model) {
 	var algorithm_active = !_Utils_eq(model.active_algorithm, $elm$core$Maybe$Nothing);
 	var active_bar = algorithm_active ? $elm$core$Maybe$Nothing : model.active_bar;
-	return A3(
+	return A2(
 		$author$project$Main$drawBarsX,
 		{active_bar: active_bar, algorithm_active: algorithm_active, max_height: $author$project$Main$kHEIGHT, padding: 5, width: 40},
-		0,
-		model.bars);
+		$elm$core$Array$toIndexedList(model.bars));
 };
 var $rtfeldman$elm_css$Svg$Styled$Attributes$fill = $rtfeldman$elm_css$VirtualDom$Styled$attribute('fill');
 var $rtfeldman$elm_css$Css$Internal$property = F2(
@@ -14200,7 +14240,7 @@ var $author$project$Main$view = function (model) {
 									]),
 								$author$project$Main$drawBars(model))),
 							$author$project$Main$problemSizeButtons(
-							$elm$core$List$length(model.bars))
+							$elm$core$Array$length(model.bars))
 						])),
 					A2(
 					$author$project$Main$algoButtons,

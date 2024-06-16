@@ -1,5 +1,6 @@
 module Main exposing (main)
 
+import Array exposing (Array)
 import AssocList as Dict exposing (Dict)
 import Bars exposing (..)
 import Browser
@@ -33,7 +34,7 @@ type alias Model =
     { coins : Int
     , tickspeed : Float
     , active_bar : Maybe Int
-    , bars : List Int
+    , bars : Array Int
     , algorithms : Dict AlgorithmType Algorithm
     , active_algorithm : Maybe AlgorithmType
     , algorithm_state : AlgorithmState
@@ -42,7 +43,7 @@ type alias Model =
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( Model 0 1000 Nothing kBARS kAlgorithmDict Nothing NoState, Cmd.none )
+    ( Model 0 1000 Nothing Array.empty kAlgorithmDict Nothing NoState, generateRandomBars 4 )
 
 
 
@@ -75,11 +76,11 @@ update msg model =
             ( { model | coins = model.coins + i }, Cmd.none )
 
         GenerateBars newBars ->
-            if barsSorted newBars then
+            if barsSortedL newBars then
                 ( model, generateRandomBars (List.length newBars) )
 
             else
-                ( { model | bars = newBars }, Cmd.none )
+                ( { model | bars = Array.fromList newBars }, Cmd.none )
 
         ChangeBarCount bar_count ->
             -- reuse the randomBars logic but use 0 as first argument for GenerateBars because no points shall be given.
@@ -104,9 +105,10 @@ update msg model =
         AlgorithmStep newBars ->
             let
                 new_model =
-                    { model | bars = newBars }
+                    { model | bars = Array.fromList newBars }
             in
             ( new_model, checkSortedAndCmd new_model )
+
 
 buyAlgorithm : Model -> AlgorithmType -> Model
 buyAlgorithm model algoT =
@@ -122,7 +124,10 @@ buyAlgorithm model algoT =
             in
             { model | coins = model.coins - algo.price, algorithms = algos }
 
+
+
 -- TODO:: initialize AlgorithmState here!
+
 
 activateAlgorithm : Model -> AlgorithmType -> Model
 activateAlgorithm model algoT =
@@ -164,7 +169,7 @@ checkSortedAndCmd model =
     if barsSorted model.bars then
         let
             count =
-                List.length model.bars
+                Array.length model.bars
         in
         Cmd.batch
             [ generateRandomBars count
@@ -174,7 +179,14 @@ checkSortedAndCmd model =
     else
         Cmd.none
 
-taskSwapBars mi ma = Task.perform (\_ -> SwapBars mi ma) (Task.succeed ())
+
+msgToCmd msg =
+    Task.perform (\_ -> msg) (Task.succeed ())
+
+
+taskSwapBars mi ma =
+    msgToCmd (SwapBars mi ma)
+
 
 clickBar : Model -> Int -> ( Model, Cmd Msg )
 clickBar model clicked =
@@ -197,7 +209,7 @@ clickBar model clicked =
                 ( { model | active_bar = Nothing }, taskSwapBars mi ma )
 
 
-insertionSortFn : List Int -> Msg
+insertionSortFn : Array Int -> Msg
 insertionSortFn l =
     let
         insertionSortFnI idx b =
@@ -212,23 +224,31 @@ insertionSortFn l =
                 _ ->
                     NoMsg
     in
-    insertionSortFnI 0 l
-
-type AlgorithmState =
-  NoState |
-  BubbleSortState {last_bar : Int}
-
-bubbleSortState = {last_bar = 0}
+    insertionSortFnI 0 (Array.toList l)
 
 
-bubbleSortInternal : {last_bar : Int} -> List Int -> Msg
-bubbleSortInternal lb bs = NoMsg
+type AlgorithmState
+    = NoState
+    | BubbleSortState { last_bar : Int }
 
-bubbleSortFn : AlgorithmState -> List Int -> Msg
-bubbleSortFn b l = 
-  case b of
-    BubbleSortState bs -> bubbleSortInternal bs l 
-    _ -> bubbleSortInternal bubbleSortState l
+
+bubbleSortState =
+    { last_bar = 0 }
+
+
+bubbleSortInternal : { last_bar : Int } -> Array Int -> Msg
+bubbleSortInternal lb bs =
+    NoMsg
+
+
+bubbleSortFn : AlgorithmState -> Array Int -> Msg
+bubbleSortFn b l =
+    case b of
+        BubbleSortState bs ->
+            bubbleSortInternal bs l
+
+        _ ->
+            bubbleSortInternal bubbleSortState l
 
 
 stepAlgorithm : Model -> t -> Msg
@@ -240,8 +260,8 @@ stepAlgorithm m _ =
         Just InsertionSort ->
             insertionSortFn m.bars
 
-        Just BubbleSort -> 
-          bubbleSortFn m.algorithm_state m.bars
+        Just BubbleSort ->
+            bubbleSortFn m.algorithm_state m.bars
 
         _ ->
             NoMsg
@@ -265,13 +285,13 @@ kWIDTH =
     800
 
 
-drawBarsX : { max_height : Int, width : Int, padding : Int, active_bar : Maybe Int, algorithm_active : Bool } -> Int -> List Int -> List (Svg.Svg Msg)
-drawBarsX statics idx bars =
-    case bars of
+drawBarsX : { max_height : Int, width : Int, padding : Int, active_bar : Maybe Int, algorithm_active : Bool } -> List ( Int, Int ) -> List (Svg.Svg Msg)
+drawBarsX statics idxd_bars =
+    case idxd_bars of
         [] ->
             []
 
-        b :: bs ->
+        ( idx, b ) :: bs ->
             Svg.rect
                 ([ SvgAttr.x (getBarPos statics.width statics.padding idx)
                  , SvgAttr.y (String.fromInt (statics.max_height - getBarHeight statics.max_height b))
@@ -299,9 +319,10 @@ drawBarsX statics idx bars =
                        )
                 )
                 []
-                :: drawBarsX statics (idx + 1) bs
+                :: drawBarsX statics bs
 
 
+drawBars : Model -> List (Svg.Svg Msg)
 drawBars model =
     let
         algorithm_active =
@@ -314,7 +335,7 @@ drawBars model =
             else
                 model.active_bar
     in
-    drawBarsX { max_height = kHEIGHT, width = 40, padding = 5, active_bar = active_bar, algorithm_active = algorithm_active } 0 model.bars
+    drawBarsX { max_height = kHEIGHT, width = 40, padding = 5, active_bar = active_bar, algorithm_active = algorithm_active } (Array.toIndexedList model.bars)
 
 
 problemSizeButtons bar_count =
@@ -381,7 +402,7 @@ view model =
                      ]
                         ++ drawBars model
                     )
-                , problemSizeButtons (List.length model.bars)
+                , problemSizeButtons (Array.length model.bars)
                 ]
             , algoButtons (Dict.values model.algorithms) model.coins
             ]
