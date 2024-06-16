@@ -10600,10 +10600,11 @@ var $elm$core$Basics$never = function (_v0) {
 	}
 };
 var $elm$browser$Browser$element = _Browser_element;
-var $author$project$Main$Model = F6(
-	function (coins, tickspeed, active_bar, bars, algorithms, active_algorithm) {
-		return {active_algorithm: active_algorithm, active_bar: active_bar, algorithms: algorithms, bars: bars, coins: coins, tickspeed: tickspeed};
+var $author$project$Main$Model = F7(
+	function (coins, tickspeed, active_bar, bars, algorithms, active_algorithm, algorithm_state) {
+		return {active_algorithm: active_algorithm, active_bar: active_bar, algorithm_state: algorithm_state, algorithms: algorithms, bars: bars, coins: coins, tickspeed: tickspeed};
 	});
+var $author$project$Main$NoState = {$: 'NoState'};
 var $pzp1997$assoc_list$AssocList$D = function (a) {
 	return {$: 'D', a: a};
 };
@@ -10671,7 +10672,7 @@ var $author$project$Bars$kBARS = _List_fromArray(
 	[10, 20, 50, 40]);
 var $author$project$Main$init = function (_v0) {
 	return _Utils_Tuple2(
-		A6($author$project$Main$Model, 0, 1000, $elm$core$Maybe$Nothing, $author$project$Bars$kBARS, $author$project$Bars$kAlgorithmDict, $elm$core$Maybe$Nothing),
+		A7($author$project$Main$Model, 0, 1000, $elm$core$Maybe$Nothing, $author$project$Bars$kBARS, $author$project$Bars$kAlgorithmDict, $elm$core$Maybe$Nothing, $author$project$Main$NoState),
 		$elm$core$Platform$Cmd$none);
 };
 var $elm$time$Time$Every = F2(
@@ -10857,6 +10858,20 @@ var $elm$time$Time$every = F2(
 			A2($elm$time$Time$Every, interval, tagger));
 	});
 var $author$project$Main$NoMsg = {$: 'NoMsg'};
+var $author$project$Main$bubbleSortInternal = F2(
+	function (lb, bs) {
+		return $author$project$Main$NoMsg;
+	});
+var $author$project$Main$bubbleSortState = {last_bar: 0};
+var $author$project$Main$bubbleSortFn = F2(
+	function (b, l) {
+		if (b.$ === 'BubbleSortState') {
+			var bs = b.a;
+			return A2($author$project$Main$bubbleSortInternal, bs, l);
+		} else {
+			return A2($author$project$Main$bubbleSortInternal, $author$project$Main$bubbleSortState, l);
+		}
+	});
 var $author$project$Main$SwapBars = F2(
 	function (a, b) {
 		return {$: 'SwapBars', a: a, b: b};
@@ -10893,11 +10908,15 @@ var $author$project$Main$stepAlgorithm = F2(
 		if (_v1.$ === 'Nothing') {
 			return $author$project$Main$NoMsg;
 		} else {
-			if (_v1.a.$ === 'InsertionSort') {
-				var _v2 = _v1.a;
-				return $author$project$Main$insertionSortFn(m.bars);
-			} else {
-				return $author$project$Main$NoMsg;
+			switch (_v1.a.$) {
+				case 'InsertionSort':
+					var _v2 = _v1.a;
+					return $author$project$Main$insertionSortFn(m.bars);
+				case 'BubbleSort':
+					var _v3 = _v1.a;
+					return A2($author$project$Main$bubbleSortFn, m.algorithm_state, m.bars);
+				default:
+					return $author$project$Main$NoMsg;
 			}
 		}
 	});
@@ -11210,6 +11229,15 @@ var $elm$core$Basics$min = F2(
 	function (x, y) {
 		return (_Utils_cmp(x, y) < 0) ? x : y;
 	});
+var $author$project$Main$taskSwapBars = F2(
+	function (mi, ma) {
+		return A2(
+			$elm$core$Task$perform,
+			function (_v0) {
+				return A2($author$project$Main$SwapBars, mi, ma);
+			},
+			$elm$core$Task$succeed(_Utils_Tuple0));
+	});
 var $author$project$Main$clickBar = F2(
 	function (model, clicked) {
 		var _v0 = model.active_bar;
@@ -11236,12 +11264,7 @@ var $author$project$Main$clickBar = F2(
 					_Utils_update(
 						model,
 						{active_bar: $elm$core$Maybe$Nothing}),
-					A2(
-						$elm$core$Task$perform,
-						function (_v1) {
-							return A2($author$project$Main$SwapBars, mi, ma);
-						},
-						$elm$core$Task$succeed(_Utils_Tuple0)));
+					A2($author$project$Main$taskSwapBars, mi, ma));
 			}
 		}
 	});

@@ -36,12 +36,13 @@ type alias Model =
     , bars : List Int
     , algorithms : Dict AlgorithmType Algorithm
     , active_algorithm : Maybe AlgorithmType
+    , algorithm_state : AlgorithmState
     }
 
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( Model 0 1000 Nothing kBARS kAlgorithmDict Nothing, Cmd.none )
+    ( Model 0 1000 Nothing kBARS kAlgorithmDict Nothing NoState, Cmd.none )
 
 
 
@@ -107,12 +108,6 @@ update msg model =
             in
             ( new_model, checkSortedAndCmd new_model )
 
-
-
--- TODO: mark algorithm as bought and active
--- TODO: subtract  the money
-
-
 buyAlgorithm : Model -> AlgorithmType -> Model
 buyAlgorithm model algoT =
     case Dict.get algoT model.algorithms of
@@ -127,6 +122,7 @@ buyAlgorithm model algoT =
             in
             { model | coins = model.coins - algo.price, algorithms = algos }
 
+-- TODO:: initialize AlgorithmState here!
 
 activateAlgorithm : Model -> AlgorithmType -> Model
 activateAlgorithm model algoT =
@@ -178,6 +174,7 @@ checkSortedAndCmd model =
     else
         Cmd.none
 
+taskSwapBars mi ma = Task.perform (\_ -> SwapBars mi ma) (Task.succeed ())
 
 clickBar : Model -> Int -> ( Model, Cmd Msg )
 clickBar model clicked =
@@ -197,7 +194,7 @@ clickBar model clicked =
                     ma =
                         Basics.max active_bar clicked
                 in
-                ( { model | active_bar = Nothing }, Task.perform (\_ -> SwapBars mi ma) (Task.succeed ()) )
+                ( { model | active_bar = Nothing }, taskSwapBars mi ma )
 
 
 insertionSortFn : List Int -> Msg
@@ -217,6 +214,22 @@ insertionSortFn l =
     in
     insertionSortFnI 0 l
 
+type AlgorithmState =
+  NoState |
+  BubbleSortState {last_bar : Int}
+
+bubbleSortState = {last_bar = 0}
+
+
+bubbleSortInternal : {last_bar : Int} -> List Int -> Msg
+bubbleSortInternal lb bs = NoMsg
+
+bubbleSortFn : AlgorithmState -> List Int -> Msg
+bubbleSortFn b l = 
+  case b of
+    BubbleSortState bs -> bubbleSortInternal bs l 
+    _ -> bubbleSortInternal bubbleSortState l
+
 
 stepAlgorithm : Model -> t -> Msg
 stepAlgorithm m _ =
@@ -226,6 +239,9 @@ stepAlgorithm m _ =
 
         Just InsertionSort ->
             insertionSortFn m.bars
+
+        Just BubbleSort -> 
+          bubbleSortFn m.algorithm_state m.bars
 
         _ ->
             NoMsg
