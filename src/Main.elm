@@ -3,6 +3,7 @@ module Main exposing (main)
 import AssocList as Dict exposing (Dict)
 import Bars exposing (..)
 import Browser
+import Buttons exposing (..)
 import Css
 import Css.Global
 import Html as OldHtml
@@ -41,6 +42,10 @@ type alias Model =
 init : () -> ( Model, Cmd Msg )
 init _ =
     ( Model 0 1000 Nothing kBARS kAlgorithmDict Nothing, Cmd.none )
+
+
+
+{- TODO: Move the Bar related messages to Bar.elm and then delegate all Bar-related stuff into the module. -}
 
 
 type Msg
@@ -280,77 +285,6 @@ subscriptions model =
 
 
 -- VIEW
-
-
-myOnPress onPress enabled =
-    if enabled then
-        [ onClick onPress ]
-
-    else
-        []
-
-
-myButtonSpec enabled =
-    if enabled then
-        [ Tw.bg_color Theme.black
-        , Tw.text_color Theme.lime_400
-        , Tw.font_bold
-        , Tw.py_2
-        , Tw.px_4
-        , Tw.rounded
-        , Css.hover
-            [ Tw.bg_color Theme.lime_700
-            ]
-        ]
-
-    else
-        [ Tw.bg_color Theme.black
-        , Tw.text_color Theme.lime_400
-        , Tw.font_bold
-        , Tw.py_2
-        , Tw.px_4
-        , Tw.rounded
-        , Tw.opacity_50
-        , Tw.cursor_not_allowed
-        ]
-
-
-myToggleButtonSpec active =
-    [ Attr.css
-        [ Tw.bg_color
-            (if active then
-                Theme.lime_900
-
-             else
-                Theme.black
-            )
-        , Tw.text_color Theme.lime_400
-        , Tw.font_bold
-        , Tw.rounded
-        , Tw.py_2
-        , Tw.px_4
-        , Css.hover
-            [ Tw.bg_color Theme.lime_700
-            ]
-        ]
-    ]
-
-
-myButton : { enabled : Bool, label : String, onPress : Msg } -> Html.Html Msg
-myButton spec =
-    Html.button
-        (myOnPress spec.onPress spec.enabled ++ [ Attr.css (myButtonSpec spec.enabled) ])
-        [ Html.pre [] [ Html.text spec.label ] ]
-
-
-myToggleButton : { label : String, onPress : Msg, active : Bool } -> Html.Html Msg
-myToggleButton spec =
-    Html.button
-        (myOnPress spec.onPress True ++ myToggleButtonSpec spec.active)
-        [ Html.pre [] [ Html.text spec.label ] ]
-
-
-
 -- SVG widget size:
 
 
@@ -376,7 +310,17 @@ drawBarsX max_height w padding active_bar algorithm_active idx bars =
                  , SvgAttr.height (String.fromInt (getBarHeight max_height b))
 
                  {- TODO: unfortunately the CSS does not work ... but in general Tailwind variables are available, which is great! -}
-                 , SvgAttr.css (myButtonSpec (not algorithm_active))
+                 , SvgAttr.css
+                    (if not algorithm_active then
+                        if active_bar == Just idx then
+                            activeButtonStyle
+
+                        else
+                            inactiveButtonStyle
+
+                     else
+                        disabledButtonStyle
+                    )
                  ]
                     ++ (if algorithm_active then
                             []
@@ -406,25 +350,29 @@ drawBars model =
 
 problemSizeButtons bar_count =
     Html.div []
-        [ myButton { onPress = ChangeBarCount (bar_count - 1), label = "<", enabled = bar_count > kMIN_BARS }
+        [ mySimpleButton { onPress = ChangeBarCount (bar_count - 1), label = "<", enabled = bar_count > kMIN_BARS }
+        , mySimpleButton { onPress = ChangeBarCount (bar_count + 1), label = ">", enabled = bar_count < kMAX_BARS }
         , Html.text "Problem Size"
-        , myButton { onPress = ChangeBarCount (bar_count + 1), label = ">", enabled = bar_count < kMAX_BARS }
         ]
 
 
 algoBuyButton : Int -> Algorithm -> Html.Html Msg
 algoBuyButton coins algo =
-    myButton { onPress = BuyAlgorithm algo.algo, label = algo.name ++ "\nCost: " ++ String.fromInt algo.price, enabled = coins > algo.price }
-
-
-
--- TODO: set an "active" state for the button
-
+    mySimpleButton { onPress = BuyAlgorithm algo.algo, label = algo.name ++ "\nCost: " ++ String.fromInt algo.price, enabled = coins > algo.price }
 
 
 algoActivateButton : Algorithm -> Html.Html Msg
 algoActivateButton algo =
-    myToggleButton { onPress = ActivateAlgorithm algo.algo, label = algo.name, active = algo.active }
+    myButton
+        { onPress = ActivateAlgorithm algo.algo
+        , label = algo.name
+        , state =
+            if algo.active then
+                Active
+
+            else
+                Inactive
+        }
 
 
 algoButton coins algo =
